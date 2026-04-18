@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useProjectStore } from '@/store/projectStore';
+import { useAuthStore } from '@/store/authStore';
 import ProjectCard from '@/components/Projects/ProjectCard';
 import ProjectList from '@/components/Projects/ProjectList';
 import ProjectKanban from '@/components/Projects/ProjectKanban';
@@ -10,6 +11,8 @@ import { PlusCircle } from 'lucide-react';
 
 const Projects: React.FC = () => {
   const { viewMode, setViewMode, getFilteredProjects } = useProjectStore();
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'Administrateur';
   const [showForm, setShowForm] = useState(false);
   const projects = getFilteredProjects();
   
@@ -23,13 +26,15 @@ const Projects: React.FC = () => {
             {projects.length} projet{projects.length > 1 ? 's' : ''} trouvé{projects.length > 1 ? 's' : ''}
           </p>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="btn btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
-        >
-          <PlusCircle size={20} />
-          Nouveau Projet
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="btn btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
+          >
+            <PlusCircle size={20} />
+            Nouveau Projet
+          </button>
+        )}
       </div>
       
       {/* Filtres */}

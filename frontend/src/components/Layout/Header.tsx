@@ -21,7 +21,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) ?? '?';
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-10 w-full">
+    <header className="glass sticky top-0 z-10 w-full border-b border-white/40">
       <div className="px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
@@ -68,8 +68,8 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                 className="fixed inset-0 z-10"
                 onClick={() => setShowDropdown(false)}
               />
-              <div className="absolute right-0 top-12 w-52 bg-white rounded-xl shadow-lg border border-gray-100 z-20 py-1 overflow-hidden">
-                <div className="px-4 py-3 border-b border-gray-100">
+              <div className="absolute right-0 top-12 w-52 glass-card border border-white/40 z-20 overflow-hidden !p-2 !rounded-xl">
+                <div className="px-3 py-2 border-b border-gray-100/50 mb-1">
                   <p className="text-sm font-semibold text-gray-900 truncate">{user?.name}</p>
                   <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                   <span className={`mt-1 inline-block badge text-xs ${user?.role === 'Administrateur' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>

@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuthStore } from '@/store/authStore';
 import { useProjectStore } from '@/store/projectStore';
 import {
-  ArrowLeft,
-  Edit,
-  Trash2,
-  Calendar,
-  TrendingUp,
-  Users,
-  PlusCircle,
   AlertCircle,
+  ArrowLeft,
+  Calendar,
+  Edit,
+  PlusCircle,
+  Trash2,
+  Users,
 } from 'lucide-react';
+import React, { useState } from 'react';
 import {
   statusConfig,
   priorityConfig,
@@ -25,7 +25,9 @@ import ProjectForm from '@/components/Projects/ProjectForm';
 const ProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getProjectById, deleteProject, updateProject, addTask, updateTask, deleteTask } =
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'Administrateur';
+  const { getProjectById, deleteProject, addTask, updateTask, deleteTask } =
     useProjectStore();
   
   const [showTaskForm, setShowTaskForm] = useState(false);
@@ -51,6 +53,7 @@ const ProjectDetail: React.FC = () => {
   const overdue = isOverdue(project.endDate, project.status);
   
   const handleDeleteProject = () => {
+    if (!isAdmin) return;
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) {
       deleteProject(project.id);
       navigate('/projects');
@@ -58,11 +61,13 @@ const ProjectDetail: React.FC = () => {
   };
   
   const handleEditTask = (task: any) => {
+    if (!isAdmin) return;
     setEditingTask(task);
     setShowTaskForm(true);
   };
   
   const handleUpdateTask = (taskData: any) => {
+    if (!isAdmin) return;
     if (editingTask) {
       updateTask(project.id, editingTask.id, taskData);
       setEditingTask(null);
@@ -72,6 +77,7 @@ const ProjectDetail: React.FC = () => {
   };
   
   const handleDeleteTask = (taskId: string) => {
+    if (!isAdmin) return;
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) {
       deleteTask(project.id, taskId);
     }
@@ -107,23 +113,27 @@ const ProjectDetail: React.FC = () => {
           </div>
         </div>
         
-        <div className="flex gap-2 sm:self-start">
-          <button
-            onClick={() => setShowProjectForm(true)}
-            className="btn btn-secondary flex-1 sm:flex-none flex items-center justify-center gap-2 text-sm"
-          >
-            <Edit size={18} />
-            Modifier
-          </button>
-          <button
-            onClick={handleDeleteProject}
-            className="btn btn-danger flex-1 sm:flex-none flex items-center justify-center gap-2 text-sm"
-          >
-            <Trash2 size={18} />
-            Supprimer
-          </button>
-        </div>
+        {isAdmin && (
+          <div className="flex gap-2 sm:self-start">
+            <button
+              onClick={() => setShowProjectForm(true)}
+              className="btn btn-secondary flex-1 sm:flex-none flex items-center justify-center gap-2 text-sm"
+            >
+              <Edit size={18} />
+              Modifier
+            </button>
+            <button
+              onClick={handleDeleteProject}
+              className="btn btn-danger flex-1 sm:flex-none flex items-center justify-center gap-2 text-sm"
+            >
+              <Trash2 size={18} />
+              Supprimer
+            </button>
+          </div>
+        )}
       </div>
+      
+      {/* ... reste du code ... */}
       
       {/* Badges et alertes */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -172,23 +182,6 @@ const ProjectDetail: React.FC = () => {
                 </span>
               </div>
             )}
-          </div>
-        </div>
-        
-        {/* Progression */}
-        <div className="card">
-          <div className="flex items-center gap-3 mb-3">
-            <TrendingUp className="text-blue-600 flex-shrink-0" size={20} />
-            <h3 className="font-semibold text-gray-900">Progression</h3>
-          </div>
-          <div className="space-y-3">
-            <div className="text-2xl sm:text-3xl font-bold text-gray-900">{project.progress}%</div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div
-                className="bg-primary-600 h-3 rounded-full transition-all"
-                style={{ width: `${project.progress}%` }}
-              />
-            </div>
           </div>
         </div>
         
@@ -250,16 +243,18 @@ const ProjectDetail: React.FC = () => {
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
             Tâches ({project.tasks.length})
           </h2>
-          <button
-            onClick={() => {
-              setEditingTask(null);
-              setShowTaskForm(true);
-            }}
-            className="btn btn-primary flex items-center justify-center gap-2 w-full sm:w-auto text-sm"
-          >
-            <PlusCircle size={20} />
-            Nouvelle Tâche
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => {
+                setEditingTask(null);
+                setShowTaskForm(true);
+              }}
+              className="btn btn-primary flex items-center justify-center gap-2 w-full sm:w-auto text-sm"
+            >
+              <PlusCircle size={20} />
+              Nouvelle Tâche
+            </button>
+          )}
         </div>
         
         {project.tasks.length > 0 ? (

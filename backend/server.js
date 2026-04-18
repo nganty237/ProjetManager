@@ -1,18 +1,16 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import sequelize, { connectDB } from './config/db.js';
+import { sequelize } from './models/index.js';
 
-// Import des modèles
-import User from './models/User.js';
-import Project from './models/Project.js';
-import Task from './models/Task.js';
-
-// Import des routes
+// Import routes
 import authRoutes from './routes/authRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+
+import { connectDB } from './config/db.js';
+import { notFound, errorHandler } from './middlewares/errorMiddleware.js';
 
 dotenv.config();
 const app = express();
@@ -22,17 +20,7 @@ const PORT = parseInt(process.env.PORT, 10) || 8080;
 app.use(cors());
 app.use(express.json());
 
-// Définition des relations (Associations Sequelize)
-Project.hasMany(Task, { onDelete: 'CASCADE' });
-Task.belongsTo(Project);
-
-Project.belongsToMany(User, { through: 'TeamMembers', as: 'members' });
-User.belongsToMany(Project, { through: 'TeamMembers', as: 'projects' });
-
-User.hasMany(Task, { foreignKey: 'assignedToId' });
-Task.belongsTo(User, { foreignKey: 'assignedToId', as: 'assignee' });
-
-// Utilisation des routes
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
@@ -42,10 +30,15 @@ app.get('/', (req, res) => {
   res.json({ message: "API PROJET MANAGER - MySQL Edition" });
 });
 
-// Lancement
+// Gestion des erreurs
+app.use(notFound);
+app.use(errorHandler);
+
+// Server Initialization
 const startServer = async () => {
   try {
     await connectDB();
+    // Synchronize models with the database. 'alter: true' updates the schema to match models without dropping data
     await sequelize.sync({ alter: true });
     console.log('Tables MySQL synchronisées.');
 

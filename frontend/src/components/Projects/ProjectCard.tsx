@@ -46,20 +46,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
         </span>
       </div>
       
-      {/* Progression */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between text-sm mb-2">
-          <span className="text-gray-600">Progression</span>
-          <span className="font-semibold text-gray-900">{project.progress}%</span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div
-            className="bg-primary-600 h-2 rounded-full transition-all"
-            style={{ width: `${project.progress}%` }}
-          />
-        </div>
-      </div>
-      
       {/* Informations */}
       <div className="space-y-2 mb-4">
         {/* Dates */}

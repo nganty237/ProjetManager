@@ -10,57 +10,57 @@ const StatsCards: React.FC = () => {
       title: 'Total Projets',
       value: stats.total,
       icon: FolderKanban,
-      color: 'bg-blue-500',
-      bgColor: 'bg-blue-50',
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-100',
     },
     {
       title: 'Projets Actifs',
       value: stats.active,
       icon: TrendingUp,
-      color: 'bg-green-500',
-      bgColor: 'bg-green-50',
+      color: 'text-green-500',
+      bgColor: 'bg-green-100',
     },
     {
       title: 'Projets Terminés',
       value: stats.completed,
       icon: CheckCircle2,
-      color: 'bg-purple-500',
-      bgColor: 'bg-purple-50',
+      color: 'text-purple-500',
+      bgColor: 'bg-purple-100',
     },
     {
       title: 'En Pause',
       value: stats.onHold,
       icon: PauseCircle,
-      color: 'bg-yellow-500',
-      bgColor: 'bg-yellow-50',
+      color: 'text-yellow-500',
+      bgColor: 'bg-yellow-100',
     },
     {
       title: 'Tâches',
       value: `${stats.completedTasks} / ${stats.totalTasks}`,
       icon: ListTodo,
-      color: 'bg-indigo-500',
-      bgColor: 'bg-indigo-50',
+      color: 'text-indigo-500',
+      bgColor: 'bg-indigo-100',
       subtitle: 'Terminées',
     },
   ];
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-      {cards.map((card) => {
+      {cards.map((card, index) => {
         const Icon = card.icon;
         return (
-          <div key={card.title} className="card">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <p className="text-sm text-gray-600 mb-1">{card.title}</p>
-                <p className="text-2xl font-bold text-gray-900">{card.value}</p>
-                {card.subtitle && (
-                  <p className="text-xs text-gray-500 mt-1">{card.subtitle}</p>
-                )}
+          <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex flex-col justify-between min-h-[110px]">
+            <div className="flex items-start justify-between w-full">
+              <p className="text-sm font-medium text-gray-500">{card.title}</p>
+              <div className={`${card.bgColor} p-2 rounded-lg`}>
+                <Icon className={`${card.color}`} size={20} />
               </div>
-              <div className={`${card.bgColor} p-3 rounded-lg`}>
-                <Icon className={`${card.color} text-white`} size={24} />
-              </div>
+            </div>
+            <div className="mt-2">
+              <p className="text-3xl font-bold text-gray-900">{card.value}</p>
+              {card.subtitle && (
+                <p className="text-xs text-gray-500 mt-1">{card.subtitle}</p>
+              )}
             </div>
           </div>
         );

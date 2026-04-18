@@ -11,7 +11,6 @@ const Dashboard: React.FC = () => {
   // Projets actifs
   const activeProjects = projects
     .filter((p) => p.status === 'active')
-    .sort((a, b) => b.progress - a.progress)
     .slice(0, 3);
   
   // Projets récents

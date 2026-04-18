@@ -30,7 +30,6 @@ export interface Project {
   priority: ProjectPriority;
   startDate: Date;
   endDate?: Date;
-  progress: number; // 0-100
   team: TeamMember[];
   tasks: Task[];
   createdAt: Date;

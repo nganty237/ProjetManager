@@ -46,11 +46,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onCreateProject }) =
 
   return (
     <aside className={`
-      fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 lg:static lg:translate-x-0
+      fixed inset-y-0 left-0 z-30 w-64 glass border-r border-white/40 flex flex-col transition-transform duration-300 lg:static lg:translate-x-0
       ${isOpen ? 'translate-x-0' : '-translate-x-full'}
     `}>
       {/* Logo & Close Button (Mobile) */}
-      <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+      <div className="p-6 border-b border-gray-200/50 flex items-center justify-between">
         <h1 className="text-xl font-bold text-primary-600 flex items-center gap-2">
           <FolderKanban size={28} />
           PROJET MANAGER
@@ -63,16 +63,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onCreateProject }) =
         </button>
       </div>
 
-      {/* Bouton Nouveau Projet */}
-      <div className="p-4">
-        <button
-          onClick={onCreateProject}
-          className="btn btn-primary w-full flex items-center justify-center gap-2"
-        >
-          <PlusCircle size={20} />
-          Nouveau Projet
-        </button>
-      </div>
+      {/* Bouton Nouveau Projet - Seulement pour Administrateurs */}
+      {user?.role === 'Administrateur' && (
+        <div className="p-4">
+          <button
+            onClick={onCreateProject}
+            className="btn btn-primary w-full flex items-center justify-center gap-2"
+          >
+            <PlusCircle size={20} />
+            Nouveau Projet
+          </button>
+        </div>
+      )}
 
       {/* Navigation */}
       <nav className="flex-1 p-4 overflow-y-auto">
@@ -101,7 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onCreateProject }) =
       </nav>
 
       {/* Footer – Utilisateur connecté */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-gray-200/50">
         <Link
           to="/profile"
           onClick={() => onClose()}

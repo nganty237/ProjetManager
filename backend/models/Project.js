@@ -29,11 +29,6 @@ const Project = sequelize.define('Project', {
   endDate: {
     type: DataTypes.DATE,
   },
-  progress: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0,
-    validate: { min: 0, max: 100 },
-  },
 });
 
 export default Project;

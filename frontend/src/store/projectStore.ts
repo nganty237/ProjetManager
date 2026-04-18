@@ -3,7 +3,6 @@ import { Project, Task, TeamMember, ProjectFilters, ViewMode } from '@/types';
 import api from '@/utils/api';
 
 interface ProjectStore {
-  // État
   projects: Project[];
   teamMembers: TeamMember[];
   filters: ProjectFilters;
@@ -12,25 +11,22 @@ interface ProjectStore {
   isLoading: boolean;
   error: string | null;
   
-  // Actions - Projets
+  // Actions for project and task management
   fetchProjects: () => Promise<void>;
   fetchTeamMembers: () => Promise<void>;
-  addProject: (project: any) => Promise<void>;
+  addProject: (project: Partial<Project>) => Promise<void>;
   updateProject: (id: string, updates: Partial<Project>) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
   setSelectedProject: (project: Project | null) => void;
   
-  // Actions - Tâches
   addTask: (projectId: string, task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateTask: (projectId: string, taskId: string, updates: Partial<Task>) => Promise<void>;
   deleteTask: (projectId: string, taskId: string) => Promise<void>;
   
-  // Actions - Filtres et Vue
   setFilters: (filters: ProjectFilters) => void;
   setViewMode: (mode: ViewMode) => void;
   clearFilters: () => void;
   
-  // Sélecteurs
   getFilteredProjects: () => Project[];
   getProjectById: (id: string) => Project | undefined;
   getProjectStats: () => {
@@ -45,7 +41,8 @@ interface ProjectStore {
   };
 }
 
-const adaptProject = (project: any): Project => {
+// Adapts MySQL naming conventions (Tasks/members) to frontend naming conventions (tasks/team)
+const adaptProject = (project: any | Project): Project => {
   return {
     ...project,
     tasks: project.tasks || project.Tasks || [],
@@ -94,6 +91,8 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
         projects: [adaptProject(response.data), ...state.projects],
       }));
     } catch (error: any) {
+      const msg = error.response?.data?.message || error.message;
+      set({ error: `Erreur lors de l'ajout: ${msg}`, isLoading: false });
       console.error("Erreur lors de l'ajout", error);
     }
   },
@@ -112,6 +111,8 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
             : state.selectedProject,
       }));
     } catch (error: any) {
+      const msg = error.response?.data?.message || error.message;
+      set({ error: `Erreur lors de la mise à jour: ${msg}` });
       console.error("Erreur lors de la mise à jour", error);
     }
   },
@@ -124,6 +125,8 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
         selectedProject: state.selectedProject?.id === id ? null : state.selectedProject,
       }));
     } catch (error: any) {
+      const msg = error.response?.data?.message || error.message;
+      set({ error: `Erreur lors de la suppression: ${msg}` });
       console.error("Erreur lors de la suppression", error);
     }
   },
@@ -148,6 +151,8 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
         ),
       }));
     } catch (error: any) {
+      const msg = error.response?.data?.message || error.message;
+      set({ error: `Erreur lors de l'ajout de tâche: ${msg}` });
       console.error("Erreur lors de l'ajout de tâche", error);
     }
   },
@@ -166,6 +171,8 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
         ),
       }));
     } catch (error: any) {
+      const msg = error.response?.data?.message || error.message;
+      set({ error: `Erreur maj tâche: ${msg}` });
       console.error("Erreur maj tâche", error);
     }
   },
@@ -184,6 +191,8 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
         ),
       }));
     } catch (error: any) {
+      const msg = error.response?.data?.message || error.message;
+      set({ error: `Erreur suppr tâche: ${msg}` });
       console.error("Erreur suppr tâche", error);
     }
   },

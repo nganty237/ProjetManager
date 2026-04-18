@@ -42,7 +42,6 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, onClose }) => {
       team: selectedTeamMembers, // Utilisé pour l'adapter localement si besoin
       teamIds: formData.selectedTeam, // Requis par le vrai backend MySQL
       tasks: project?.tasks || [],
-      progress: project?.progress || 0,
     };
     
     if (project) {

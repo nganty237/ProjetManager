@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, UserPlus, User, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, UserPlus, User, AlertCircle, Eye, EyeOff, Shield } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
 import api from '@/utils/api';
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
+  const loginStore = useAuthStore((state) => state.login);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -14,6 +16,7 @@ const Signup: React.FC = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    role: 'Membre',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,9 +38,20 @@ const Signup: React.FC = () => {
         name: formData.name,
         email: formData.email,
         password: formData.password,
+        role: formData.role,
       });
+
+      // Connexion automatique après inscription réussie
+      const loginResponse = await api.post('/auth/login', {
+        email: formData.email,
+        password: formData.password,
+      });
+
+      const { user, token } = loginResponse.data;
+      loginStore(user, token);
+
       setSuccess(true);
-      setTimeout(() => navigate('/login'), 2000);
+      setTimeout(() => navigate('/'), 1000);
     } catch (err: any) {
       if (err.response?.data?.message) {
         setError(err.response.data.message);
@@ -50,8 +64,12 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-blue-100 px-4">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-body px-4 relative overflow-hidden">
+      {/* Decorative background blobs for premium feel */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary-300 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 animate-blob"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-300 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 animate-blob animation-delay-2000"></div>
+
+      <div className="max-w-md w-full space-y-8 glass-card relative z-10">
         {/* Logo / Titre */}
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-600 text-white mb-4 shadow-lg">
@@ -71,7 +89,7 @@ const Signup: React.FC = () => {
         {success && (
           <div className="bg-green-50 text-green-700 p-4 rounded-lg flex items-center gap-3 text-sm border border-green-200">
             <span className="text-lg">✓</span>
-            Compte créé avec succès ! Redirection vers la connexion...
+            Compte créé avec succès ! Redirection vers votre espace...
           </div>
         )}
 
@@ -156,6 +174,24 @@ const Signup: React.FC = () => {
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
               />
+            </div>
+          </div>
+
+          {/* Rôle */}
+          <div>
+            <label className="label">Type de compte</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                <Shield size={18} />
+              </div>
+              <select
+                className="input pl-10 appearance-none"
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+              >
+                <option value="Membre">Membre (Accès standard)</option>
+                <option value="Administrateur">Administrateur (Gestion complète)</option>
+              </select>
             </div>
           </div>
 
