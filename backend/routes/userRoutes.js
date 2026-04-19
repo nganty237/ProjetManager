@@ -1,12 +1,13 @@
 import express from 'express';
 import { getUsers, getMe, updateMe, updatePassword, updateUserRole, deleteUser } from '../controllers/userController.js';
 import { protect, isAdmin } from '../middlewares/authMiddleware.js';
+import upload from '../middlewares/uploadMiddleware.js';
 
 const router = express.Router();
 
 // Profil de l'utilisateur connecté
 router.get('/me', protect, getMe);
-router.put('/me', protect, updateMe);
+router.put('/me', protect, upload.single('avatarFile'), updateMe);
 
 router.put('/me/password', protect, updatePassword);
 

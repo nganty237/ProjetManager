@@ -19,6 +19,8 @@ const PORT = parseInt(process.env.PORT, 10) || 8080;
 // Middleware
 app.use(cors());
 app.use(express.json());
+import path from 'path';
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // API Routes
 app.use('/api/auth', authRoutes);

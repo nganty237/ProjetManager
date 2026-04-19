@@ -27,6 +27,8 @@ const Profile: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [editData, setEditData] = useState({ name: '', avatar: '' });
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchProfile();
@@ -49,10 +51,20 @@ const Profile: React.FC = () => {
     setError('');
     setSuccess('');
     try {
-      const response = await api.put('/users/me', {
-        name: editData.name,
-        avatar: editData.avatar || undefined,
-      });
+      let response;
+      if (avatarFile) {
+        const formData = new FormData();
+        formData.append('name', editData.name);
+        formData.append('avatarFile', avatarFile);
+        response = await api.put('/users/me', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      } else {
+        response = await api.put('/users/me', {
+          name: editData.name,
+          avatar: editData.avatar || undefined,
+        });
+      }
       const updatedUser = response.data;
       setProfile((prev) => prev ? { ...prev, ...updatedUser } : prev);
       // Mettre à jour le store Zustand
@@ -148,7 +160,11 @@ const Profile: React.FC = () => {
               </div>
             )}
             {editing && (
-              <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-full border border-gray-200 flex items-center justify-center shadow-sm text-gray-500">
+              <div 
+                className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-full border border-gray-200 flex items-center justify-center shadow-sm text-gray-500 cursor-pointer hover:bg-gray-50"
+                onClick={() => fileInputRef.current?.click()}
+                title="Changer d'avatar"
+              >
                 <Camera size={14} />
               </div>
             )}
@@ -173,10 +189,29 @@ const Profile: React.FC = () => {
                   <input
                     id="profile-avatar"
                     type="url"
-                    className="input"
+                    className="input mb-2"
                     placeholder="https://..."
                     value={editData.avatar}
                     onChange={(e) => setEditData({ ...editData, avatar: e.target.value })}
+                  />
+                  <div className="text-center text-xs font-semibold text-gray-400 my-2">— OU —</div>
+                  <label className="label text-left">Télécharger une image depuis votre PC</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    className="block w-full text-sm text-gray-500
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-md file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-primary-50 file:text-primary-700
+                      hover:file:bg-primary-100 border border-gray-200 rounded-md p-1"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        setAvatarFile(e.target.files[0]);
+                        setEditData({ ...editData, avatar: '' }); // Clear URL if file selected
+                      }
+                    }}
                   />
                 </div>
               </div>

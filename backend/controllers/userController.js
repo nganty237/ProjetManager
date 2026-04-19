@@ -57,6 +57,11 @@ export const updateMe = asyncHandler(async (req, res) => {
   }
   
   if (avatar) user.avatar = avatar;
+  
+  if (req.file) {
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    user.avatar = `${baseUrl}/uploads/${req.file.filename}`;
+  }
   await user.save();
   res.json({
     id: user.id,
