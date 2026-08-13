@@ -32,8 +32,22 @@ export const updateTask = asyncHandler(async (req, res) => {
     throw new Error("Tâche non trouvée");
   }
 
-  await task.update(req.body);
-  
+  const isAdmin = req.user && req.user.role === 'Administrateur';
+  const isAssignee = task.assignedToId && (task.assignedToId.toString() === req.user.id.toString());
+
+  if (!isAdmin && !isAssignee) {
+    res.status(403);
+    throw new Error("Accès refusé : seul un administrateur ou la personne assignée peut modifier cette tâche");
+  }
+
+  if (!isAdmin && isAssignee) {
+    // Le membre assigné non-admin ne peut mettre à jour que le statut de sa tâche
+    task.status = req.body.status || task.status;
+    await task.save();
+  } else {
+    await task.update(req.body);
+  }
+
   const updatedTask = await Task.findByPk(task.id, {
     include: [{ model: User, as: 'assignee', attributes: ['id', 'name', 'avatar'] }]
   });

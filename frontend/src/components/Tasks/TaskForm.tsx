@@ -5,11 +5,11 @@ import { X } from 'lucide-react';
 interface TaskFormProps {
   task?: Task;
   teamMembers: TeamMember[];
-  onSubmit: (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onSubmit: (data: any) => void;
   onClose: () => void;
 }
 
-const TaskForm: React.FC<TaskFormProps> = ({ task, teamMembers, onSubmit, onClose }) => {
+export function TaskForm({ task, teamMembers, onSubmit, onClose }: TaskFormProps) {
   const [formData, setFormData] = useState({
     title: task?.title || '',
     description: task?.description || '',

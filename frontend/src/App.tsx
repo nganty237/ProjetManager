@@ -1,23 +1,22 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Sidebar from '@/components/Layout/Sidebar';
 import Header from '@/components/Layout/Header';
-import Dashboard from '@/pages/Dashboard';
-import Projects from '@/pages/Projects';
-import ProjectDetail from '@/pages/ProjectDetail';
-import Team from '@/pages/Team';
-import Settings from '@/pages/Settings';
-import Profile from '@/pages/Profile';
-import Login from '@/pages/Login';
-import Signup from '@/pages/Signup';
-import ProjectForm from '@/components/Projects/ProjectForm';
-import ProtectedRoute from '@/components/Auth/ProtectedRoute';
+import { Dashboard } from '@/pages/Dashboard';
+import { Projects } from '@/pages/Projects';
+import { ProjectDetail } from '@/pages/ProjectDetail';
+import { Team } from '@/pages/Team';
+import { Settings } from '@/pages/Settings';
+import { Profile } from '@/pages/Profile';
+import { Login } from '@/pages/Login';
+import { Signup } from '@/pages/Signup';
+import { ProjectForm } from '@/components/Projects/ProjectForm';
+import { ProtectedRoute } from '@/components/Auth/ProtectedRoute';
 import { useAuthStore } from '@/store/authStore';
 import { useProjectStore } from '@/store/projectStore';
-import { useEffect } from 'react';
 
 // Layout wrapper for authenticated routes
-const AuthenticatedLayout: React.FC = () => {
+function AuthenticatedLayout() {
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const fetchProjects = useProjectStore((state) => state.fetchProjects);

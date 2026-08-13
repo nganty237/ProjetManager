@@ -17,6 +17,7 @@ export interface Task {
   status: 'todo' | 'in-progress' | 'review' | 'done';
   priority: ProjectPriority;
   assignedTo?: TeamMember;
+  assignedToId?: string;
   dueDate?: Date;
   createdAt: Date;
   updatedAt: Date;

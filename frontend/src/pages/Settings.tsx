@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { User, Bell, Lock, Palette, Shield, Trash2 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/utils/api';
 
-const Settings: React.FC = () => {
+export function Settings() {
   const { user, updateUser } = useAuthStore();
   const isAdmin = user?.role === 'Administrateur';
 

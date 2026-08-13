@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { Project, ProjectStatus, ProjectPriority } from '@/types';
 import { X } from 'lucide-react';
 import { useProjectStore } from '@/store/projectStore';
+import { UserAvatar } from '@/components/Common/UserAvatar';
 
 interface ProjectFormProps {
   project?: Project;
   onClose: () => void;
 }
 
-const ProjectForm: React.FC<ProjectFormProps> = ({ project, onClose }) => {
+export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const { addProject, updateProject, teamMembers } = useProjectStore();
   
   const [formData, setFormData] = useState({
@@ -192,11 +193,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, onClose }) => {
                     onChange={() => handleTeamSelection(member.id)}
                     className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
                   />
-                  <img
-                    src={member.avatar}
-                    alt={member.name}
-                    className="w-8 h-8 rounded-full"
-                  />
+                  <UserAvatar name={member.name} avatar={member.avatar} size="sm" />
                   <div className="flex-1">
                     <div className="text-sm font-medium text-gray-900">
                       {member.name}

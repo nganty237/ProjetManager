@@ -1,85 +1,90 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useProjectStore } from '@/store/projectStore';
 import { useAuthStore } from '@/store/authStore';
-import ProjectCard from '@/components/Projects/ProjectCard';
-import ProjectList from '@/components/Projects/ProjectList';
-import ProjectKanban from '@/components/Projects/ProjectKanban';
-import ProjectFilters from '@/components/Projects/ProjectFilters';
-import ProjectForm from '@/components/Projects/ProjectForm';
+import { ProjectCard } from '@/components/Projects/ProjectCard';
+import { ProjectList } from '@/components/Projects/ProjectList';
+import { ProjectKanban } from '@/components/Projects/ProjectKanban';
+import { ProjectFilters } from '@/components/Projects/ProjectFilters';
+import { ProjectForm } from '@/components/Projects/ProjectForm';
 import { ViewMode } from '@/types';
-import { PlusCircle } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
-const Projects: React.FC = () => {
+/**
+ * Main project management page offering grid, list, and kanban view layouts.
+ */
+export function Projects() {
   const { viewMode, setViewMode, getFilteredProjects } = useProjectStore();
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'Administrateur';
   const [showForm, setShowForm] = useState(false);
   const projects = getFilteredProjects();
-  
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-6 sm:space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Projets</h1>
-          <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">
-            {projects.length} projet{projects.length > 1 ? 's' : ''} trouvé{projects.length > 1 ? 's' : ''}
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Gestion des Projets
+            </h1>
+            <span className="bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-full border border-slate-200">
+              {projects.length}
+            </span>
+          </div>
+          <p className="text-slate-500 text-xs sm:text-sm mt-1">
+            Gérez, suivez et collaborez sur tous vos projets en cours
           </p>
         </div>
+
         {isAdmin && (
           <button
             onClick={() => setShowForm(true)}
-            className="btn btn-primary flex items-center justify-center gap-2 w-full sm:w-auto"
+            className="btn btn-primary flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold shadow-md shadow-blue-500/20"
           >
-            <PlusCircle size={20} />
-            Nouveau Projet
+            <Plus size={18} />
+            <span>Nouveau Projet</span>
           </button>
         )}
       </div>
-      
-      {/* Filtres */}
+
       <ProjectFilters
         viewMode={viewMode}
         onViewModeChange={(mode: ViewMode) => setViewMode(mode)}
       />
-      
-      {/* Vue des projets */}
-      <div className="min-w-0 overflow-x-auto sm:overflow-x-visible pb-4">
+
+      <div className="min-w-0">
         {viewMode === 'grid' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.map((project) => (
               <ProjectCard key={project.id} project={project} />
             ))}
             {projects.length === 0 && (
-              <div className="col-span-full card text-center text-gray-500 py-12">
-                Aucun projet trouvé
+              <div className="col-span-full bg-white rounded-2xl border border-slate-200/80 p-12 text-center text-slate-400 font-medium">
+                Aucun projet ne correspond à vos critères de recherche.
               </div>
             )}
           </div>
         )}
-        
+
         {viewMode === 'list' && (
-          <div className="hidden sm:block">
-            <ProjectList />
+          <div>
+            <div className="hidden sm:block">
+              <ProjectList />
+            </div>
+            <div className="sm:hidden grid grid-cols-1 gap-4">
+              {projects.map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
           </div>
         )}
-        {viewMode === 'list' && (
-          <div className="sm:hidden grid grid-cols-1 gap-4">
-            {projects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
-            ))}
-          </div>
-        )}
-        
+
         {viewMode === 'kanban' && <ProjectKanban />}
       </div>
-      
-      {/* Modal du formulaire */}
-      {showForm && (
-        <ProjectForm onClose={() => setShowForm(false)} />
-      )}
+
+      {showForm && <ProjectForm onClose={() => setShowForm(false)} />}
     </div>
   );
-};
+}
 
 export default Projects;

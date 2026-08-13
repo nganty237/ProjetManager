@@ -4,26 +4,27 @@
 
 @layer base {
   :root {
-    /* Premium Soft Violet/Indigo theme */
-    --brand-50: 245 243 255;
-    --brand-100: 237 233 254;
-    --brand-200: 221 214 254;
-    --brand-300: 196 181 253;
-    --brand-400: 167 139 250;
-    --brand-500: 139 92 246;
-    --brand-600: 124 58 237;
-    --brand-700: 109 40 217;
-    --brand-800: 91 33 182;
-    --brand-900: 76 29 149;
+    /* Corporate Professional Blue Theme */
+    --brand-50: 239 246 255;   /* #eff6ff */
+    --brand-100: 219 234 254;  /* #dbeafe */
+    --brand-200: 191 219 254;  /* #bfdbfe */
+    --brand-300: 147 197 253;  /* #93c5fd */
+    --brand-400: 96 165 250;   /* #60a5fa */
+    --brand-500: 59 130 246;   /* #3b82f6 */
+    --brand-600: 37 99 235;    /* #2563eb */
+    --brand-700: 29 78 216;    /* #1d4ed8 */
+    --brand-800: 30 58 138;    /* #1e3a8a */
+    --brand-900: 15 23 42;     /* #0f172a */
     
-    --bg-body: 248 250 252; /* slate 50 */
+    --sidebar-bg: 15 23 42;    /* Slate 900 Navy */
+    --bg-body: 248 250 252;    /* Slate 50 */
     --bg-surface: 255 255 255;
   }
 
   body {
     @apply antialiased tracking-tight;
     background-color: rgb(var(--bg-body));
-    color: #0f172a; /* slate 900 */
+    color: #0f172a;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
 }

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, UserPlus, User, AlertCircle, Eye, EyeOff, Shield } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/utils/api';
 
-const Signup: React.FC = () => {
+export function Signup() {
   const navigate = useNavigate();
   const loginStore = useAuthStore((state) => state.login);
   const [error, setError] = useState('');

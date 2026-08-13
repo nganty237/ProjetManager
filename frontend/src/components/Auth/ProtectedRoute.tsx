@@ -1,8 +1,7 @@
-import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 
-const ProtectedRoute: React.FC = () => {
+export function ProtectedRoute() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   // Remarque : Si un système de chargement d'état (hydration) est ajouté, 

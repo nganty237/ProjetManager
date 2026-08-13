@@ -10,24 +10,25 @@ import {
   Trash2,
   Users,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
-  statusConfig,
   priorityConfig,
   formatDate,
   getDaysRemaining,
   isOverdue,
 } from '@/utils/constants';
-import TaskCard from '@/components/Tasks/TaskCard';
-import TaskForm from '@/components/Tasks/TaskForm';
-import ProjectForm from '@/components/Projects/ProjectForm';
+import { TaskCard } from '@/components/Tasks/TaskCard';
+import { TaskForm } from '@/components/Tasks/TaskForm';
+import { ProjectForm } from '@/components/Projects/ProjectForm';
+import { UserAvatar } from '@/components/Common/UserAvatar';
+import { StatusDropdown } from '@/components/Common/StatusDropdown';
 
-const ProjectDetail: React.FC = () => {
+export function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'Administrateur';
-  const { getProjectById, deleteProject, addTask, updateTask, deleteTask } =
+  const { getProjectById, updateProject, deleteProject, addTask, updateTask, deleteTask } =
     useProjectStore();
   
   const [showTaskForm, setShowTaskForm] = useState(false);
@@ -47,7 +48,6 @@ const ProjectDetail: React.FC = () => {
     );
   }
   
-  const status = statusConfig[project.status];
   const priority = priorityConfig[project.priority];
   const daysRemaining = project.endDate ? getDaysRemaining(project.endDate) : null;
   const overdue = isOverdue(project.endDate, project.status);
@@ -83,7 +83,15 @@ const ProjectDetail: React.FC = () => {
     }
   };
   
+  const handleProjectStatusChange = (newStatus: any) => {
+    if (!isAdmin) return;
+    updateProject(project.id, { status: newStatus });
+  };
+
   const handleTaskStatusChange = (taskId: string, newStatus: any) => {
+    const task = project.tasks.find((t) => t.id === taskId);
+    const canChangeStatus = isAdmin || (user?.id && (task?.assignedTo?.id === user.id || task?.assignedToId === user.id));
+    if (!canChangeStatus) return;
     updateTask(project.id, taskId, { status: newStatus });
   };
   
@@ -133,14 +141,15 @@ const ProjectDetail: React.FC = () => {
         )}
       </div>
       
-      {/* ... reste du code ... */}
-      
       {/* Badges et alertes */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-        <span className={`badge ${status.bgColor} ${status.color} text-xs sm:text-sm`}>
-          {status.icon} {status.label}
-        </span>
-        <span className={`badge ${priority.bgColor} ${priority.color} text-xs sm:text-sm`}>
+        <StatusDropdown
+          value={project.status}
+          type="project"
+          onChange={handleProjectStatusChange}
+          disabled={!isAdmin}
+        />
+        <span className={`badge ${priority.bgColor} ${priority.color} text-xs sm:text-sm flex items-center gap-1.5`}>
           {priority.icon} {priority.label}
         </span>
         {overdue && (
@@ -191,18 +200,15 @@ const ProjectDetail: React.FC = () => {
             <Users className="text-purple-600 flex-shrink-0" size={20} />
             <h3 className="font-semibold text-gray-900">Équipe</h3>
           </div>
-          <div className="space-y-2 max-h-32 overflow-y-auto pr-2">
+          <div className="space-y-2.5 max-h-36 overflow-y-auto pr-1">
             {project.team.map((member) => (
-              <div key={member.id} className="flex items-center gap-2">
-                <img
-                  src={member.avatar}
-                  alt={member.name}
-                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex-shrink-0"
-                />
+              <div key={member.id} className="flex items-center gap-3 p-1.5 hover:bg-slate-50 rounded-xl transition-colors">
+                <UserAvatar name={member.name} avatar={member.avatar} size="sm" />
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-900 truncate">
+                  <div className="text-sm font-semibold text-slate-800 truncate">
                     {member.name}
                   </div>
+                  <div className="text-xs text-slate-400 truncate">{member.role}</div>
                 </div>
               </div>
             ))}

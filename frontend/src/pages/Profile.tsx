@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import {
@@ -6,6 +6,7 @@ import {
   FolderOpen, CheckCircle, LogOut, AlertCircle
 } from 'lucide-react';
 import api from '@/utils/api';
+import { UserAvatar } from '@/components/Common/UserAvatar';
 
 interface UserProfile {
   id: string;
@@ -17,7 +18,7 @@ interface UserProfile {
   Tasks?: { id: string; title: string; status: string }[];
 }
 
-const Profile: React.FC = () => {
+export function Profile() {
   const navigate = useNavigate();
   const { updateUser, logout } = useAuthStore();
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -28,7 +29,7 @@ const Profile: React.FC = () => {
   const [success, setSuccess] = useState('');
   const [editData, setEditData] = useState({ name: '', avatar: '' });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchProfile();
@@ -83,8 +84,7 @@ const Profile: React.FC = () => {
     navigate('/login');
   };
 
-  const getInitials = (name: string) =>
-    name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+
 
   const getRoleBadge = (role: string) => {
     if (role === 'Administrateur') {
@@ -148,17 +148,7 @@ const Profile: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           {/* Avatar */}
           <div className="relative">
-            {profile.avatar ? (
-              <img
-                src={profile.avatar}
-                alt={profile.name}
-                className="w-24 h-24 rounded-2xl object-cover shadow-md"
-              />
-            ) : (
-              <div className="w-24 h-24 rounded-2xl bg-primary-600 flex items-center justify-center text-white text-2xl font-bold shadow-md">
-                {getInitials(profile.name)}
-              </div>
-            )}
+            <UserAvatar name={profile.name} avatar={profile.avatar} size="xl" className="w-24 h-24 text-2xl shadow-md" />
             {editing && (
               <div 
                 className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-full border border-gray-200 flex items-center justify-center shadow-sm text-gray-500 cursor-pointer hover:bg-gray-50"

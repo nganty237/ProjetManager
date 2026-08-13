@@ -1,116 +1,107 @@
-import React from 'react';
 import { Project } from '@/types';
 import { statusConfig, priorityConfig, formatDate, getDaysRemaining, isOverdue } from '@/utils/constants';
-import { Calendar, TrendingUp, Users, AlertCircle } from 'lucide-react';
+import { Calendar, TrendingUp, Users, AlertCircle, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { UserAvatar } from '@/components/Common/UserAvatar';
 
 interface ProjectCardProps {
   project: Project;
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
+/**
+ * Reusable card component for displaying individual project details in grid views.
+ */
+export function ProjectCard({ project }: ProjectCardProps) {
   const navigate = useNavigate();
+
   const status = statusConfig[project.status];
   const priority = priorityConfig[project.priority];
   const daysRemaining = project.endDate ? getDaysRemaining(project.endDate) : null;
   const overdue = isOverdue(project.endDate, project.status);
-  
-  const handleClick = () => {
-    navigate(`/projects/${project.id}`);
-  };
-  
+  const completedTasksCount = project.tasks.filter((t) => t.status === 'done').length;
+
   return (
     <div
-      onClick={handleClick}
-      className="card hover:shadow-lg transition-shadow cursor-pointer"
+      onClick={() => navigate(`/projects/${project.id}`)}
+      className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs hover:shadow-lg hover:border-blue-200/90 transition-all duration-300 cursor-pointer flex flex-col justify-between group"
     >
-      {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      <div>
+        <div className="flex items-start justify-between gap-3 mb-2.5">
+          <h3 className="text-base font-extrabold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
             {project.title}
           </h3>
-          <p className="text-sm text-gray-600 line-clamp-2">
-            {project.description}
-          </p>
         </div>
-      </div>
-      
-      {/* Badges */}
-      <div className="flex gap-2 mb-4">
-        <span className={`badge ${status.bgColor} ${status.color}`}>
-          {status.icon} {status.label}
-        </span>
-        <span className={`badge ${priority.bgColor} ${priority.color}`}>
-          {priority.icon} {priority.label}
-        </span>
-      </div>
-      
-      {/* Informations */}
-      <div className="space-y-2 mb-4">
-        {/* Dates */}
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Calendar size={16} />
-          <span>{formatDate(project.startDate)}</span>
-          {project.endDate && (
-            <>
-              <span>→</span>
-              <span className={overdue ? 'text-red-600 font-medium' : ''}>
-                {formatDate(project.endDate)}
-              </span>
-            </>
-          )}
-        </div>
-        
-        {/* Jours restants */}
-        {daysRemaining !== null && project.status !== 'completed' && (
-          <div className="flex items-center gap-2 text-sm">
-            {overdue ? (
-              <span className="text-red-600 font-medium flex items-center gap-1">
-                <AlertCircle size={16} />
-                En retard de {Math.abs(daysRemaining)} jours
-              </span>
-            ) : (
-              <span className="text-gray-600">
-                {daysRemaining} jours restants
-              </span>
-            )}
-          </div>
-        )}
-        
-        {/* Tâches */}
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <TrendingUp size={16} />
-          <span>
-            {project.tasks.filter((t) => t.status === 'done').length} / {project.tasks.length} tâches
+
+        <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-4 min-h-[32px]">
+          {project.description || 'Aucune description fournie.'}
+        </p>
+
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <span className={`badge ${status.bgColor} ${status.color} text-[11px] font-bold flex items-center gap-1.5`}>
+            {status.icon} {status.label}
+          </span>
+          <span className={`badge ${priority.bgColor} ${priority.color} text-[11px] font-bold`}>
+            {priority.label}
           </span>
         </div>
+
+        <div className="space-y-2 pt-3 border-t border-slate-100 text-xs">
+          {project.endDate && (
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-slate-500 font-medium">
+                <Calendar size={14} className="text-slate-400 shrink-0" />
+                {formatDate(project.endDate)}
+              </span>
+
+              {overdue ? (
+                <span className="text-rose-600 font-bold flex items-center gap-1 bg-rose-50 px-2 py-0.5 rounded-md text-[11px]">
+                  <AlertCircle size={13} />
+                  Retard: {Math.abs(daysRemaining || 0)} j
+                </span>
+              ) : daysRemaining !== null ? (
+                <span className="text-slate-500 font-medium bg-slate-50 px-2 py-0.5 rounded-md text-[11px]">
+                  {daysRemaining} j restants
+                </span>
+              ) : null}
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 text-slate-500 font-medium pt-1">
+            <TrendingUp size={14} className="text-blue-500 shrink-0" />
+            <span className="text-slate-700 font-bold">
+              {completedTasksCount} / {project.tasks.length} tâches
+            </span>
+          </div>
+        </div>
       </div>
-      
-      {/* Équipe */}
-      <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+
+      <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100">
         <div className="flex items-center gap-2">
-          <Users size={16} className="text-gray-500" />
-          <div className="flex -space-x-2">
+          <Users size={14} className="text-slate-400 shrink-0" />
+          <div className="flex -space-x-1.5 overflow-hidden">
             {project.team.slice(0, 3).map((member) => (
-              <img
+              <UserAvatar
                 key={member.id}
-                src={member.avatar}
-                alt={member.name}
-                className="w-8 h-8 rounded-full border-2 border-white"
-                title={member.name}
+                name={member.name}
+                avatar={member.avatar}
+                size="xs"
+                className="ring-2 ring-white"
               />
             ))}
             {project.team.length > 3 && (
-              <div className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
+              <div className="w-6 h-6 rounded-full ring-2 ring-white bg-slate-100 flex items-center justify-center text-[9px] font-bold text-slate-600">
                 +{project.team.length - 3}
               </div>
             )}
           </div>
         </div>
+
+        <span className="p-1.5 rounded-lg text-slate-400 group-hover:text-blue-600 group-hover:bg-blue-50 transition-colors">
+          <ArrowRight size={16} />
+        </span>
       </div>
     </div>
   );
-};
+}
 
 export default ProjectCard;
