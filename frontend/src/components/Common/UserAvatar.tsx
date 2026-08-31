@@ -43,19 +43,19 @@ export function UserAvatar({
         src={avatar}
         alt={name || 'Utilisateur'}
         onError={() => setImageError(true)}
-        className={`${sizeClasses} rounded-full object-cover shrink-0 border border-slate-200/80 shadow-xs ${className}`}
+        className={`${sizeClasses} object-cover shrink-0 rounded border border-slate-200 ${className}`}
       />
     );
   }
 
   return (
     <div
-      className={`${sizeClasses} rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs border border-white/80 ${className}`}
+      className={`${sizeClasses} bg-slate-700 text-white flex items-center justify-center shrink-0 rounded border border-slate-600 ${className}`}
       title={name}
     >
       {getInitials(name)}
     </div>
   );
-};
+}
 
 export default UserAvatar;

@@ -1,11 +1,11 @@
 import { useProjectStore } from '@/store/projectStore';
 import { useNavigate } from 'react-router-dom';
 import { statusConfig, priorityConfig, formatDate } from '@/utils/constants';
-import { Calendar, TrendingUp, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { UserAvatar } from '@/components/Common/UserAvatar';
 
 /**
- * List component for displaying projects in a structured table row view.
+ * List component for displaying projects in a structured grid layout with aligned columns.
  */
 export function ProjectList() {
   const { getFilteredProjects } = useProjectStore();
@@ -13,7 +13,18 @@ export function ProjectList() {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+    <div className="bg-white border border-slate-200 rounded-md overflow-hidden">
+      {/* Header line with column specifications */}
+      <div className="grid grid-cols-12 gap-4 items-center px-4 py-3 bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider select-none">
+        <div className="col-span-4">PROJET</div>
+        <div className="col-span-2">STATUT</div>
+        <div className="col-span-2">PRIORITÉ</div>
+        <div className="col-span-2">ÉCHÉANCE</div>
+        <div className="col-span-1">ÉQUIPE</div>
+        <div className="col-span-1 text-right">ACTION</div>
+      </div>
+
+      {/* Project rows aligning with header */}
       <div className="divide-y divide-slate-100">
         {projects.map((project) => {
           const status = statusConfig[project.status];
@@ -24,41 +35,43 @@ export function ProjectList() {
             <div
               key={project.id}
               onClick={() => navigate(`/projects/${project.id}`)}
-              className="p-4 sm:p-5 hover:bg-slate-50/80 transition-all cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4 group"
+              className="grid grid-cols-12 gap-4 items-center px-4 py-3.5 hover:bg-slate-50 transition-colors cursor-pointer group text-xs text-slate-700"
             >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2.5 mb-1">
-                  <h3 className="text-base font-extrabold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
-                    {project.title}
-                  </h3>
-                  <span className={`badge ${priority.bgColor} ${priority.color} text-[10px] font-bold`}>
-                    {priority.label}
+              {/* PROJET */}
+              <div className="col-span-4 min-w-0 pr-2">
+                <h3 className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
+                  {project.title}
+                </h3>
+                <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5">
+                  <span className="truncate">{project.description || 'Aucune description'}</span>
+                  <span className="text-slate-300">•</span>
+                  <span className="font-semibold text-slate-600 shrink-0">
+                    {completedTasksCount}/{project.tasks.length} tâches
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 line-clamp-1">
-                  {project.description || 'Aucune description'}
-                </p>
               </div>
 
-              <div className="shrink-0">
-                <span className={`badge ${status.bgColor} ${status.color} text-xs font-semibold flex items-center gap-1.5`}>
+              {/* STATUT */}
+              <div className="col-span-2">
+                <span className={`badge ${status.bgColor} ${status.color}`}>
                   {status.icon} {status.label}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between md:justify-end gap-5 text-xs text-slate-500 shrink-0 border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
-                <div className="flex items-center gap-1.5 font-medium whitespace-nowrap">
-                  <Calendar size={14} className="text-slate-400 shrink-0" />
-                  <span>{project.endDate ? formatDate(project.endDate) : '-'}</span>
-                </div>
+              {/* PRIORITÉ */}
+              <div className="col-span-2">
+                <span className={`badge ${priority.bgColor} ${priority.color}`}>
+                  {priority.label}
+                </span>
+              </div>
 
-                <div className="flex items-center gap-1.5 font-bold text-slate-700 whitespace-nowrap">
-                  <TrendingUp size={14} className="text-blue-500 shrink-0" />
-                  <span>
-                    {completedTasksCount} / {project.tasks.length}
-                  </span>
-                </div>
+              {/* ÉCHÉANCE */}
+              <div className="col-span-2 font-medium text-slate-600 whitespace-nowrap">
+                {project.endDate ? formatDate(project.endDate) : '-'}
+              </div>
 
+              {/* ÉQUIPE */}
+              <div className="col-span-1">
                 <div className="flex -space-x-1.5 overflow-hidden">
                   {project.team.slice(0, 3).map((member) => (
                     <UserAvatar
@@ -66,19 +79,29 @@ export function ProjectList() {
                       name={member.name}
                       avatar={member.avatar}
                       size="xs"
-                      className="ring-2 ring-white"
+                      className="border border-white"
                     />
                   ))}
                   {project.team.length > 3 && (
-                    <div className="w-6 h-6 rounded-full ring-2 ring-white bg-slate-100 flex items-center justify-center text-[9px] font-bold text-slate-600">
+                    <div className="w-6 h-6 bg-slate-100 border border-white flex items-center justify-center text-[9px] font-bold text-slate-600 rounded">
                       +{project.team.length - 3}
                     </div>
                   )}
                 </div>
+              </div>
 
-                <span className="p-1 rounded-lg text-slate-400 group-hover:text-blue-600 group-hover:bg-blue-50 transition-colors hidden md:inline-block">
+              {/* ACTION */}
+              <div className="col-span-1 text-right">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/projects/${project.id}`);
+                  }}
+                  className="p-1.5 text-slate-400 group-hover:text-blue-600 hover:bg-slate-100 transition-colors inline-flex items-center justify-center rounded"
+                  title="Voir le projet"
+                >
                   <ArrowRight size={16} />
-                </span>
+                </button>
               </div>
             </div>
           );

@@ -49,16 +49,16 @@ export function TaskForm({ task, teamMembers, onSubmit, onClose }: TaskFormProps
   };
   
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-lg w-full">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-md max-w-lg w-full border border-slate-200">
         {/* Header */}
-        <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">
+        <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+          <h2 className="text-xl font-extrabold text-slate-900">
             {task ? 'Modifier la tâche' : 'Nouvelle tâche'}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-100 rounded transition-colors"
           >
             <X size={20} />
           </button>
@@ -159,7 +159,7 @@ export function TaskForm({ task, teamMembers, onSubmit, onClose }: TaskFormProps
           </div>
           
           {/* Boutons */}
-          <div className="flex gap-3 pt-4 border-t border-gray-200">
+          <div className="flex gap-3 pt-4 border-t border-slate-200">
             <button type="button" onClick={onClose} className="btn btn-secondary flex-1">
               Annuler
             </button>

@@ -40,8 +40,8 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
       priority: formData.priority,
       startDate: new Date(formData.startDate),
       endDate: formData.endDate ? new Date(formData.endDate) : undefined,
-      team: selectedTeamMembers, // Utilisé pour l'adapter localement si besoin
-      teamIds: formData.selectedTeam, // Requis par le vrai backend MySQL
+      team: selectedTeamMembers,
+      teamIds: formData.selectedTeam,
       tasks: project?.tasks || [],
     };
     
@@ -71,16 +71,16 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   };
   
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-md max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">
+        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
+          <h2 className="text-xl font-extrabold text-slate-900">
             {project ? 'Modifier le projet' : 'Nouveau projet'}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-100 rounded transition-colors"
           >
             <X size={20} />
           </button>
@@ -185,20 +185,20 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
               {teamMembers.map((member) => (
                 <label
                   key={member.id}
-                  className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-3 p-3 border border-slate-200 rounded-md cursor-pointer hover:bg-slate-50 transition-colors"
                 >
                   <input
                     type="checkbox"
                     checked={formData.selectedTeam.includes(member.id)}
                     onChange={() => handleTeamSelection(member.id)}
-                    className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                   />
                   <UserAvatar name={member.name} avatar={member.avatar} size="sm" />
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-900">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-bold text-slate-900 truncate">
                       {member.name}
                     </div>
-                    <div className="text-xs text-gray-500">{member.role}</div>
+                    <div className="text-[11px] text-slate-400 truncate">{member.role}</div>
                   </div>
                 </label>
               ))}
@@ -206,7 +206,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
           </div>
           
           {/* Boutons */}
-          <div className="flex gap-3 pt-4 border-t border-gray-200">
+          <div className="flex gap-3 pt-4 border-t border-slate-200">
             <button type="button" onClick={onClose} className="btn btn-secondary flex-1">
               Annuler
             </button>

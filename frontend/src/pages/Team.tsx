@@ -33,14 +33,13 @@ export function Team() {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* En-tête de la page Équipe */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Gestion de l'Équipe
             </h1>
-            <span className="bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-full border border-slate-200">
+            <span className="badge bg-slate-100 text-slate-700 text-xs">
               {teamMembers.length} membres
             </span>
           </div>
@@ -49,13 +48,12 @@ export function Team() {
           </p>
         </div>
 
-        {/* Barre de filtres par rôles */}
-        <div className="flex items-center bg-slate-100/80 p-1 rounded-xl border border-slate-200/60 self-start sm:self-auto">
+        <div className="flex items-center bg-slate-100 p-1 rounded-md border border-slate-200 self-start sm:self-auto">
           <button
             onClick={() => setRoleFilter('all')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded text-xs font-bold transition-colors cursor-pointer ${
               roleFilter === 'all'
-                ? 'bg-white text-blue-600 shadow-2xs'
+                ? 'bg-white text-blue-600 border border-slate-200'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -63,9 +61,9 @@ export function Team() {
           </button>
           <button
             onClick={() => setRoleFilter('admin')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded text-xs font-bold transition-colors cursor-pointer ${
               roleFilter === 'admin'
-                ? 'bg-white text-amber-600 shadow-2xs'
+                ? 'bg-white text-amber-600 border border-slate-200'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -73,9 +71,9 @@ export function Team() {
           </button>
           <button
             onClick={() => setRoleFilter('member')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded text-xs font-bold transition-colors cursor-pointer ${
               roleFilter === 'member'
-                ? 'bg-white text-blue-600 shadow-2xs'
+                ? 'bg-white text-blue-600 border border-slate-200'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -84,27 +82,26 @@ export function Team() {
         </div>
       </div>
 
-      {/* Section 1 : Rubrique Administrateurs */}
       {(roleFilter === 'all' || roleFilter === 'admin') && (
         <div className="space-y-4">
-          <div className="flex items-center gap-2.5 pb-2 border-b border-slate-200/80">
-            <div className="p-1.5 bg-amber-50 text-amber-600 rounded-lg border border-amber-200/60">
-              <Crown size={18} />
+          <div className="flex items-center gap-2.5 pb-2 border-b border-slate-200">
+            <div className="p-1.5 bg-amber-50 text-amber-600 rounded border border-amber-200">
+              <Crown size={16} />
             </div>
-            <h2 className="text-lg font-extrabold text-slate-900">
+            <h2 className="text-base font-extrabold text-slate-900">
               Administrateurs
             </h2>
-            <span className="text-xs font-bold bg-amber-100/70 text-amber-800 px-2 py-0.5 rounded-full">
+            <span className="badge bg-amber-100 text-amber-800 text-[10px]">
               {admins.length}
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {admins.map((member) => (
               <TeamMemberCard key={member.id} member={member} />
             ))}
             {admins.length === 0 && (
-              <div className="col-span-full bg-white rounded-2xl border border-slate-200/80 p-8 text-center text-slate-400 text-sm font-medium">
+              <div className="col-span-full bg-white rounded-md border border-slate-200 p-8 text-center text-slate-400 text-sm font-medium">
                 Aucun administrateur trouvé.
               </div>
             )}
@@ -112,27 +109,26 @@ export function Team() {
         </div>
       )}
 
-      {/* Section 2 : Rubrique Membres */}
       {(roleFilter === 'all' || roleFilter === 'member') && (
         <div className="space-y-4 pt-2">
-          <div className="flex items-center gap-2.5 pb-2 border-b border-slate-200/80">
-            <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg border border-blue-200/60">
-              <UserCheck size={18} />
+          <div className="flex items-center gap-2.5 pb-2 border-b border-slate-200">
+            <div className="p-1.5 bg-blue-50 text-blue-600 rounded border border-blue-200">
+              <UserCheck size={16} />
             </div>
-            <h2 className="text-lg font-extrabold text-slate-900">
+            <h2 className="text-base font-extrabold text-slate-900">
               Membres de l'Équipe
             </h2>
-            <span className="text-xs font-bold bg-blue-100/70 text-blue-800 px-2 py-0.5 rounded-full">
+            <span className="badge bg-blue-100 text-blue-800 text-[10px]">
               {members.length}
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {members.map((member) => (
               <TeamMemberCard key={member.id} member={member} />
             ))}
             {members.length === 0 && (
-              <div className="col-span-full bg-white rounded-2xl border border-slate-200/80 p-8 text-center text-slate-400 text-sm font-medium">
+              <div className="col-span-full bg-white rounded-md border border-slate-200 p-8 text-center text-slate-400 text-sm font-medium">
                 Aucun membre trouvé.
               </div>
             )}
@@ -150,7 +146,7 @@ function TeamMemberCard({ member }: { member: any }) {
   const isAdmin = member.isAdmin;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs hover:shadow-lg hover:border-blue-200/90 transition-all duration-300 flex flex-col justify-between group">
+    <div className="bg-white rounded-md border border-slate-200 p-5 hover:border-slate-300 transition-colors flex flex-col justify-between group">
       <div>
         <div className="flex items-start gap-3.5 mb-4">
           <UserAvatar name={member.name} avatar={member.avatar} size="lg" />
@@ -159,12 +155,12 @@ function TeamMemberCard({ member }: { member: any }) {
               {member.name}
             </h3>
             <div className="flex items-center gap-1.5 mb-2">
-              <Shield size={13} className={isAdmin ? 'text-amber-500' : 'text-blue-500'} />
+              <Shield size={12} className={isAdmin ? 'text-amber-500' : 'text-blue-500'} />
               <span
-                className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                className={`badge text-[10px] ${
                   isAdmin
-                    ? 'bg-amber-50 text-amber-700 border border-amber-200/60'
-                    : 'bg-blue-50 text-blue-700 border border-blue-200/60'
+                    ? 'bg-amber-50 text-amber-700 border-amber-200'
+                    : 'bg-blue-50 text-blue-700 border-blue-200'
                 }`}
               >
                 {member.role}
@@ -183,7 +179,7 @@ function TeamMemberCard({ member }: { member: any }) {
       </div>
 
       <div className="pt-3 border-t border-slate-100">
-        <div className="grid grid-cols-3 gap-2 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100 text-center">
+        <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded border border-slate-200 text-center">
           <div className="space-y-0.5">
             <div className="flex items-center justify-center gap-1 text-blue-600 font-extrabold text-base">
               <FolderKanban size={14} />

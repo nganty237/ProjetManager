@@ -10,6 +10,9 @@ interface StatusDropdownProps {
   className?: string;
 }
 
+/**
+ * Custom dropdown component for selecting project or task statuses with subtle rounded styling.
+ */
 export function StatusDropdown({
   value,
   type = 'project',
@@ -39,7 +42,7 @@ export function StatusDropdown({
 
   if (disabled) {
     return (
-      <span className={`badge ${currentConfig.bgColor} ${currentConfig.color} flex items-center gap-1.5 text-xs font-semibold ${className}`}>
+      <span className={`badge ${currentConfig.bgColor} ${currentConfig.color} ${className}`}>
         {currentConfig.icon && <span className="shrink-0">{currentConfig.icon}</span>}
         <span>{currentConfig.label}</span>
       </span>
@@ -59,15 +62,15 @@ export function StatusDropdown({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`badge ${currentConfig.bgColor} ${currentConfig.color} flex items-center gap-1.5 text-xs font-bold cursor-pointer hover:opacity-90 transition-all border border-black/5 shadow-2xs ${className}`}
+        className={`badge ${currentConfig.bgColor} ${currentConfig.color} cursor-pointer hover:opacity-90 transition-colors border border-black/5 ${className}`}
       >
         {currentConfig.icon && <span className="shrink-0">{currentConfig.icon}</span>}
         <span>{currentConfig.label}</span>
-        <ChevronDown size={14} className={`transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown size={13} className={`transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 mt-1.5 w-44 bg-white rounded-2xl shadow-xl border border-slate-200/90 py-1.5 z-50 text-xs font-semibold animate-in fade-in slide-in-from-top-1 duration-150">
+        <div className="absolute left-0 mt-1.5 w-44 bg-white rounded-md shadow-md border border-slate-200 py-1 z-50 text-xs font-semibold">
           <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
             Changer le statut
           </div>
@@ -81,12 +84,12 @@ export function StatusDropdown({
                   onChange(opt.key);
                   setIsOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3.5 py-2 hover:bg-slate-50 transition-colors text-left ${
+                className={`w-full flex items-center justify-between px-3 py-1.5 hover:bg-slate-50 transition-colors text-left ${
                   isSelected ? 'bg-slate-50 text-blue-600 font-bold' : 'text-slate-700'
                 }`}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${opt.bgColor} border border-black/10`} />
+                  <span className={`w-2 h-2 rounded-sm shrink-0 ${opt.bgColor} border border-black/10`} />
                   <span className="truncate">{opt.label}</span>
                 </div>
                 {isSelected && <Check size={14} className="text-blue-600 shrink-0 ml-1" />}
@@ -98,3 +101,5 @@ export function StatusDropdown({
     </div>
   );
 }
+
+export default StatusDropdown;

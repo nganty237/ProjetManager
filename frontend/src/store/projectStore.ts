@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Project, Task, TeamMember, ProjectFilters, ViewMode } from '@/types';
+import { Project, Task, TeamMember, ProjectFilters, ViewMode, Expense } from '@/types';
 import api from '@/utils/api';
 
 interface ProjectStore {
@@ -22,6 +22,12 @@ interface ProjectStore {
   addTask: (projectId: string, task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateTask: (projectId: string, taskId: string, updates: Partial<Task>) => Promise<void>;
   deleteTask: (projectId: string, taskId: string) => Promise<void>;
+  
+  // Budget & Expenses actions
+  setBudget: (projectId: string, allocated: number) => void;
+  addExpense: (projectId: string, expense: Omit<Expense, 'id' | 'projectId' | 'createdAt'>) => void;
+  updateExpense: (projectId: string, expenseId: string, updates: Partial<Expense>) => void;
+  deleteExpense: (projectId: string, expenseId: string) => void;
   
   setFilters: (filters: ProjectFilters) => void;
   setViewMode: (mode: ViewMode) => void;
@@ -47,8 +53,13 @@ const adaptProject = (project: any | Project): Project => {
     ...project,
     tasks: project.tasks || project.Tasks || [],
     team: project.team || project.members || [],
+    expenses: project.expenses || [],
+    budget: project.budget || undefined,
   };
 };
+
+/** Génère un ID unique simple */
+const genId = () => `exp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
 export const useProjectStore = create<ProjectStore>((set, get) => ({
   // État initial
@@ -84,8 +95,6 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
 
   addProject: async (projectData) => {
     try {
-      // The backend expects teamIds instead of team. Let's adapt output payload if needed or just let it pass
-      // Actually backend accepts what we send, but team assignment would need teamIds. For now we just adapt response.
       const response = await api.post('/projects', projectData);
       set((state) => ({
         projects: [adaptProject(response.data), ...state.projects],
@@ -139,7 +148,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   addTask: async (projectId, taskData) => {
     try {
       const response = await api.post(`/tasks/${projectId}`, taskData);
-      const newTask = response.data.task || response.data; // Adapte selon ce que backend renvoie
+      const newTask = response.data.task || response.data;
       set((state) => ({
         projects: state.projects.map((project) =>
           project.id === projectId
@@ -196,7 +205,90 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       console.error("Erreur suppr tâche", error);
     }
   },
-  
+
+  // ===== Actions Budget & Dépenses (frontend uniquement pour l'instant) =====
+
+  setBudget: (projectId, allocated) => {
+    set((state) => ({
+      projects: state.projects.map((p) =>
+        p.id === projectId
+          ? { ...p, budget: { allocated }, updatedAt: new Date() }
+          : p
+      ),
+      selectedProject:
+        state.selectedProject?.id === projectId
+          ? { ...state.selectedProject, budget: { allocated }, updatedAt: new Date() }
+          : state.selectedProject,
+    }));
+  },
+
+  addExpense: (projectId, expenseData) => {
+    const newExpense: Expense = {
+      ...expenseData,
+      id: genId(),
+      projectId,
+      createdAt: new Date(),
+    };
+    set((state) => ({
+      projects: state.projects.map((p) =>
+        p.id === projectId
+          ? { ...p, expenses: [...(p.expenses || []), newExpense] }
+          : p
+      ),
+      selectedProject:
+        state.selectedProject?.id === projectId
+          ? {
+              ...state.selectedProject,
+              expenses: [...(state.selectedProject.expenses || []), newExpense],
+            }
+          : state.selectedProject,
+    }));
+  },
+
+  updateExpense: (projectId, expenseId, updates) => {
+    set((state) => ({
+      projects: state.projects.map((p) =>
+        p.id === projectId
+          ? {
+              ...p,
+              expenses: (p.expenses || []).map((e) =>
+                e.id === expenseId ? { ...e, ...updates } : e
+              ),
+            }
+          : p
+      ),
+      selectedProject:
+        state.selectedProject?.id === projectId
+          ? {
+              ...state.selectedProject,
+              expenses: (state.selectedProject.expenses || []).map((e) =>
+                e.id === expenseId ? { ...e, ...updates } : e
+              ),
+            }
+          : state.selectedProject,
+    }));
+  },
+
+  deleteExpense: (projectId, expenseId) => {
+    set((state) => ({
+      projects: state.projects.map((p) =>
+        p.id === projectId
+          ? {
+              ...p,
+              expenses: (p.expenses || []).filter((e) => e.id !== expenseId),
+            }
+          : p
+      ),
+      selectedProject:
+        state.selectedProject?.id === projectId
+          ? {
+              ...state.selectedProject,
+              expenses: (state.selectedProject.expenses || []).filter((e) => e.id !== expenseId),
+            }
+          : state.selectedProject,
+    }));
+  },
+
   // Actions - Filtres et Vue
   setFilters: (filters) => {
     set({ filters });
@@ -215,25 +307,18 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     const { projects, filters } = get();
     
     return projects.filter((project) => {
-      // Filtre par statut
       if (filters.status && filters.status.length > 0) {
         if (!filters.status.includes(project.status)) return false;
       }
-      
-      // Filtre par priorité
       if (filters.priority && filters.priority.length > 0) {
         if (!filters.priority.includes(project.priority)) return false;
       }
-      
-      // Filtre par recherche
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
         const matchesTitle = project.title.toLowerCase().includes(searchLower);
         const matchesDescription = project.description?.toLowerCase().includes(searchLower) || false;
-        
         if (!matchesTitle && !matchesDescription) return false;
       }
-      
       return true;
     });
   },
@@ -244,8 +329,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   
   getProjectStats: () => {
     const { projects } = get();
-    
-    const stats = {
+    return {
       total: projects.length,
       active: projects.filter((p) => p.status === 'active').length,
       completed: projects.filter((p) => p.status === 'completed').length,
@@ -258,7 +342,5 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
         0
       ),
     };
-    
-    return stats;
   },
 }));

@@ -27,7 +27,7 @@ export function Projects() {
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Gestion des Projets
             </h1>
-            <span className="bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-full border border-slate-200">
+            <span className="badge bg-slate-100 text-slate-700 text-xs rounded">
               {projects.length}
             </span>
           </div>
@@ -39,7 +39,7 @@ export function Projects() {
         {isAdmin && (
           <button
             onClick={() => setShowForm(true)}
-            className="btn btn-primary flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold shadow-md shadow-blue-500/20"
+            className="btn btn-primary flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold rounded-md"
           >
             <Plus size={18} />
             <span>Nouveau Projet</span>
@@ -59,7 +59,7 @@ export function Projects() {
               <ProjectCard key={project.id} project={project} />
             ))}
             {projects.length === 0 && (
-              <div className="col-span-full bg-white rounded-2xl border border-slate-200/80 p-12 text-center text-slate-400 font-medium">
+              <div className="col-span-full bg-white rounded-md border border-slate-200 p-12 text-center text-slate-400 font-medium">
                 Aucun projet ne correspond à vos critères de recherche.
               </div>
             )}

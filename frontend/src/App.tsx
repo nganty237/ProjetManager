@@ -8,6 +8,7 @@ import { ProjectDetail } from '@/pages/ProjectDetail';
 import { Team } from '@/pages/Team';
 import { Settings } from '@/pages/Settings';
 import { Profile } from '@/pages/Profile';
+import { Finance } from '@/pages/Finance';
 import { Login } from '@/pages/Login';
 import { Signup } from '@/pages/Signup';
 import { ProjectForm } from '@/components/Projects/ProjectForm';
@@ -28,7 +29,7 @@ function AuthenticatedLayout() {
   }, [fetchProjects, fetchTeamMembers]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-slate-50">
       {/* Sidebar Overlay for Mobile */}
       {isSidebarOpen && (
         <div 
@@ -83,6 +84,7 @@ function App() {
             <Route path="/projects" element={<Projects />} />
             <Route path="/projects/:id" element={<ProjectDetail />} />
             <Route path="/team" element={<Team />} />
+            <Route path="/finance" element={<Finance />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Profile />} />
           </Route>

@@ -41,7 +41,6 @@ export function Signup() {
         role: formData.role,
       });
 
-      // Connexion automatique après inscription réussie
       const loginResponse = await api.post('/auth/login', {
         email: formData.email,
         password: formData.password,
@@ -64,41 +63,39 @@ export function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-body px-4 relative overflow-hidden">
-      {/* Decorative background blobs for premium feel */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary-300 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 animate-blob"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-300 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 animate-blob animation-delay-2000"></div>
-
-      <div className="max-w-md w-full space-y-8 glass-card relative z-10">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-8">
+      <div className="max-w-md w-full p-8 bg-white border border-slate-200 space-y-8">
         {/* Logo / Titre */}
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-600 text-white mb-4 shadow-lg">
-            <UserPlus size={28} />
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-600 text-white mb-4">
+            <UserPlus size={26} />
           </div>
-          <h1 className="text-3xl font-extrabold text-gray-900">Inscription</h1>
-          <p className="mt-2 text-sm text-gray-600">Rejoignez <span className="font-semibold text-primary-600">PROJET MANAGER</span></p>
+          <h1 className="text-2xl font-extrabold text-slate-900">Inscription</h1>
+          <p className="mt-1.5 text-sm text-slate-600">
+            Rejoignez <span className="font-semibold text-slate-900">PROJET MANAGER</span>
+          </p>
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-700 p-4 rounded-lg flex items-center gap-3 text-sm border border-red-200">
-            <AlertCircle size={18} className="shrink-0" />
+          <div className="bg-rose-50 text-rose-700 p-3.5 flex items-center gap-3 text-xs font-semibold border border-rose-200">
+            <AlertCircle size={16} className="shrink-0" />
             {error}
           </div>
         )}
 
         {success && (
-          <div className="bg-green-50 text-green-700 p-4 rounded-lg flex items-center gap-3 text-sm border border-green-200">
-            <span className="text-lg">✓</span>
-            Compte créé avec succès ! Redirection vers votre espace...
+          <div className="bg-emerald-50 text-emerald-700 p-3.5 flex items-center gap-3 text-xs font-semibold border border-emerald-200">
+            <span>✓</span>
+            Compte créé avec succès ! Redirection...
           </div>
         )}
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleSubmit}>
           {/* Nom complet */}
           <div>
             <label className="label">Nom complet</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                 <User size={18} />
               </div>
               <input
@@ -106,7 +103,7 @@ export function Signup() {
                 type="text"
                 required
                 className="input pl-10"
-                placeholder="nganty gabriel"
+                placeholder="Ex: Jean Dupont"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
@@ -117,7 +114,7 @@ export function Signup() {
           <div>
             <label className="label">Email</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                 <Mail size={18} />
               </div>
               <input
@@ -136,7 +133,7 @@ export function Signup() {
           <div>
             <label className="label">Mot de passe</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                 <Lock size={18} />
               </div>
               <input
@@ -150,7 +147,7 @@ export function Signup() {
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -162,7 +159,7 @@ export function Signup() {
           <div>
             <label className="label">Confirmer le mot de passe</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                 <Lock size={18} />
               </div>
               <input
@@ -181,11 +178,11 @@ export function Signup() {
           <div>
             <label className="label">Type de compte</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                 <Shield size={18} />
               </div>
               <select
-                className="input pl-10 appearance-none"
+                className="input pl-10 appearance-none bg-white"
                 value={formData.role}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
               >
@@ -199,28 +196,28 @@ export function Signup() {
             id="signup-submit"
             type="submit"
             disabled={loading || success}
-            className="btn btn-primary w-full flex items-center justify-center gap-2 py-3 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="btn btn-primary w-full flex items-center justify-center gap-2 py-2.5 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-white border-t-transparent animate-spin" />
             ) : (
               <>
-                <UserPlus size={20} />
+                <UserPlus size={18} />
                 S'inscrire
               </>
             )}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-600">
+        <p className="text-center text-xs text-slate-600">
           Vous avez déjà un compte ?{' '}
-          <Link to="/login" className="text-primary-600 font-semibold hover:underline">
+          <Link to="/login" className="text-blue-600 font-bold hover:underline">
             Se connecter
           </Link>
         </p>
       </div>
     </div>
   );
-};
+}
 
 export default Signup;

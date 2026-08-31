@@ -68,7 +68,6 @@ export function Profile() {
       }
       const updatedUser = response.data;
       setProfile((prev) => prev ? { ...prev, ...updatedUser } : prev);
-      // Mettre à jour le store Zustand
       updateUser(updatedUser);
       setSuccess('Profil mis à jour avec succès !');
       setEditing(false);
@@ -84,27 +83,25 @@ export function Profile() {
     navigate('/login');
   };
 
-
-
   const getRoleBadge = (role: string) => {
     if (role === 'Administrateur') {
-      return 'bg-purple-100 text-purple-800 border border-purple-200';
+      return 'bg-amber-50 text-amber-800 border border-amber-200';
     }
-    return 'bg-blue-100 text-blue-800 border border-blue-200';
+    return 'bg-blue-50 text-blue-800 border border-blue-200';
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-64">
-        <div className="w-10 h-10 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!profile) {
     return (
-      <div className="card text-center text-gray-500 py-12">
-        <AlertCircle className="mx-auto mb-2 text-red-500" size={32} />
+      <div className="card text-center text-slate-500 py-12">
+        <AlertCircle className="mx-auto mb-2 text-rose-600" size={32} />
         Impossible de charger le profil.
       </div>
     );
@@ -118,12 +115,12 @@ export function Profile() {
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Mon Profil</h1>
-          <p className="text-gray-500 mt-1 text-sm">Gérez vos informations personnelles</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">Mon Profil</h1>
+          <p className="text-slate-500 mt-1 text-sm">Gérez vos informations personnelles</p>
         </div>
         <button
           onClick={handleLogout}
-          className="btn btn-secondary flex items-center gap-2 text-red-600 hover:bg-red-50"
+          className="btn btn-secondary flex items-center gap-2 text-rose-600 hover:bg-rose-50 border-rose-200"
         >
           <LogOut size={18} />
           <span className="hidden sm:inline">Déconnexion</span>
@@ -131,13 +128,13 @@ export function Profile() {
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-700 p-4 rounded-lg flex items-center gap-3 text-sm border border-red-200">
+        <div className="bg-rose-50 text-rose-700 p-3.5 rounded-md flex items-center gap-3 text-xs font-semibold border border-rose-200">
           <AlertCircle size={18} className="shrink-0" />
           {error}
         </div>
       )}
       {success && (
-        <div className="bg-green-50 text-green-700 p-4 rounded-lg flex items-center gap-3 text-sm border border-green-200">
+        <div className="bg-emerald-50 text-emerald-700 p-3.5 rounded-md flex items-center gap-3 text-xs font-semibold border border-emerald-200">
           <CheckCircle size={18} className="shrink-0" />
           {success}
         </div>
@@ -148,10 +145,10 @@ export function Profile() {
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           {/* Avatar */}
           <div className="relative">
-            <UserAvatar name={profile.name} avatar={profile.avatar} size="xl" className="w-24 h-24 text-2xl shadow-md" />
+            <UserAvatar name={profile.name} avatar={profile.avatar} size="xl" className="w-24 h-24 text-2xl" />
             {editing && (
               <div 
-                className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-full border border-gray-200 flex items-center justify-center shadow-sm text-gray-500 cursor-pointer hover:bg-gray-50"
+                className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded border border-slate-300 flex items-center justify-center text-slate-600 cursor-pointer hover:bg-slate-50"
                 onClick={() => fileInputRef.current?.click()}
                 title="Changer d'avatar"
               >
@@ -184,22 +181,22 @@ export function Profile() {
                     value={editData.avatar}
                     onChange={(e) => setEditData({ ...editData, avatar: e.target.value })}
                   />
-                  <div className="text-center text-xs font-semibold text-gray-400 my-2">— OU —</div>
+                  <div className="text-center text-xs font-semibold text-slate-400 my-2">— OU —</div>
                   <label className="label text-left">Télécharger une image depuis votre PC</label>
                   <input
                     type="file"
                     accept="image/*"
                     ref={fileInputRef}
-                    className="block w-full text-sm text-gray-500
+                    className="block w-full text-sm text-slate-500
                       file:mr-4 file:py-2 file:px-4
                       file:rounded-md file:border-0
-                      file:text-sm file:font-semibold
-                      file:bg-primary-50 file:text-primary-700
-                      hover:file:bg-primary-100 border border-gray-200 rounded-md p-1"
+                      file:text-xs file:font-semibold
+                      file:bg-blue-50 file:text-blue-700
+                      hover:file:bg-blue-100 border border-slate-300 rounded-md p-1"
                     onChange={(e) => {
                       if (e.target.files && e.target.files[0]) {
                         setAvatarFile(e.target.files[0]);
-                        setEditData({ ...editData, avatar: '' }); // Clear URL if file selected
+                        setEditData({ ...editData, avatar: '' });
                       }
                     }}
                   />
@@ -207,17 +204,17 @@ export function Profile() {
               </div>
             ) : (
               <>
-                <h2 className="text-2xl font-bold text-gray-900">{profile.name}</h2>
+                <h2 className="text-2xl font-extrabold text-slate-900">{profile.name}</h2>
                 <div className="flex items-center justify-center sm:justify-start gap-2 mt-1">
-                  <Mail size={14} className="text-gray-400" />
-                  <span className="text-gray-500 text-sm">{profile.email}</span>
+                  <Mail size={14} className="text-slate-400" />
+                  <span className="text-slate-600 text-sm">{profile.email}</span>
                 </div>
               </>
             )}
 
             {/* Badge rôle */}
             <div className="mt-3 flex items-center justify-center sm:justify-start gap-2">
-              <Shield size={14} className="text-gray-500" />
+              <Shield size={14} className="text-slate-500" />
               <span className={`badge ${getRoleBadge(profile.role)}`}>
                 {profile.role}
               </span>
@@ -261,22 +258,22 @@ export function Profile() {
       {/* Statistiques */}
       <div className="grid grid-cols-3 gap-4">
         <div className="card text-center">
-          <div className="text-3xl font-bold text-primary-600">{totalProjects}</div>
-          <div className="text-sm text-gray-500 mt-1 flex items-center justify-center gap-1">
+          <div className="text-3xl font-extrabold text-blue-600">{totalProjects}</div>
+          <div className="text-xs text-slate-500 mt-1 flex items-center justify-center gap-1 font-semibold">
             <FolderOpen size={14} />
             Projets
           </div>
         </div>
         <div className="card text-center">
-          <div className="text-3xl font-bold text-green-600">{completedTasks}</div>
-          <div className="text-sm text-gray-500 mt-1 flex items-center justify-center gap-1">
+          <div className="text-3xl font-extrabold text-emerald-600">{completedTasks}</div>
+          <div className="text-xs text-slate-500 mt-1 flex items-center justify-center gap-1 font-semibold">
             <CheckCircle size={14} />
             Tâches terminées
           </div>
         </div>
         <div className="card text-center">
-          <div className="text-3xl font-bold text-blue-600">{totalTasks}</div>
-          <div className="text-sm text-gray-500 mt-1 flex items-center justify-center gap-1">
+          <div className="text-3xl font-extrabold text-indigo-600">{totalTasks}</div>
+          <div className="text-xs text-slate-500 mt-1 flex items-center justify-center gap-1 font-semibold">
             <User size={14} />
             Total tâches
           </div>
@@ -286,18 +283,18 @@ export function Profile() {
       {/* Projets récents */}
       {profile.projects && profile.projects.length > 0 && (
         <div className="card">
-          <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <FolderOpen size={18} className="text-primary-600" />
+          <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <FolderOpen size={18} className="text-blue-600" />
             Mes projets ({totalProjects})
           </h3>
           <div className="space-y-2">
             {profile.projects.map((project) => (
-              <div key={project.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                <span className="text-sm font-medium text-gray-800">{project.title}</span>
+              <div key={project.id} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                <span className="text-sm font-semibold text-slate-800">{project.title}</span>
                 <span className={`badge text-xs ${
-                  project.status === 'completed' ? 'bg-green-100 text-green-700' :
-                  project.status === 'active' ? 'bg-blue-100 text-blue-700' :
-                  'bg-gray-100 text-gray-600'
+                  project.status === 'completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                  project.status === 'active' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                  'bg-slate-100 text-slate-700 border-slate-200'
                 }`}>
                   {project.status}
                 </span>
@@ -308,6 +305,6 @@ export function Profile() {
       )}
     </div>
   );
-};
+}
 
 export default Profile;

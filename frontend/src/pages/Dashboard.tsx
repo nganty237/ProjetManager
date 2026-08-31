@@ -1,5 +1,6 @@
 import { useProjectStore } from '@/store/projectStore';
 import { StatsCards } from '@/components/Dashboard/StatsCards';
+import { BudgetSummary } from '@/components/Dashboard/BudgetSummary';
 import { UserAvatar } from '@/components/Common/UserAvatar';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -55,7 +56,7 @@ export function Dashboard() {
         </div>
         <button
           onClick={() => navigate('/projects')}
-          className="btn btn-primary flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold shadow-md shadow-blue-500/20"
+          className="btn btn-primary flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold rounded-md"
         >
           <FolderKanban size={16} />
           <span>Voir tous les projets</span>
@@ -67,10 +68,11 @@ export function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         <div className="lg:col-span-2 space-y-6 sm:space-y-8">
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+          {/* Aperçu des projets récents */}
+          <div className="bg-white border border-slate-200 rounded-md overflow-hidden">
+            <div className="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
+                <div className="p-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-md">
                   <Layers size={18} />
                 </div>
                 <div>
@@ -90,7 +92,7 @@ export function Dashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-50/70 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                     <th className="py-3 px-4">Projet</th>
                     <th className="py-3 px-4">Statut</th>
                     <th className="py-3 px-4">Priorité</th>
@@ -108,7 +110,7 @@ export function Dashboard() {
                       return (
                         <tr
                           key={project.id}
-                          className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                          className="hover:bg-slate-50 transition-colors group cursor-pointer"
                           onClick={() => navigate(`/projects/${project.id}`)}
                         >
                           <td className="py-3.5 px-4 font-bold text-slate-900 max-w-[180px] truncate">
@@ -122,12 +124,12 @@ export function Dashboard() {
                             </div>
                           </td>
                           <td className="py-3.5 px-4">
-                            <span className={`badge ${status.bgColor} ${status.color} text-[11px] font-bold inline-flex items-center gap-1`}>
+                            <span className={`badge ${status.bgColor} ${status.color}`}>
                               {status.label}
                             </span>
                           </td>
                           <td className="py-3.5 px-4">
-                            <span className={`badge ${priority.bgColor} ${priority.color} text-[11px] font-bold`}>
+                            <span className={`badge ${priority.bgColor} ${priority.color}`}>
                               {priority.label}
                             </span>
                           </td>
@@ -142,11 +144,11 @@ export function Dashboard() {
                                   name={member.name}
                                   avatar={member.avatar}
                                   size="xs"
-                                  className="ring-2 ring-white"
+                                  className="border border-white"
                                 />
                               ))}
                               {project.team.length > 3 && (
-                                <div className="w-6 h-6 rounded-full ring-2 ring-white bg-slate-100 flex items-center justify-center text-[9px] font-bold text-slate-600">
+                                <div className="w-6 h-6 bg-slate-100 border border-white rounded flex items-center justify-center text-[9px] font-bold text-slate-600">
                                   +{project.team.length - 3}
                                 </div>
                               )}
@@ -155,7 +157,7 @@ export function Dashboard() {
                           <td className="py-3.5 px-4 text-right">
                             <button
                               onClick={() => navigate(`/projects/${project.id}`)}
-                              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-slate-100 rounded transition-colors cursor-pointer"
                               title="Voir les détails"
                             >
                               <ArrowRight size={16} />
@@ -176,10 +178,11 @@ export function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
+          {/* Tâches prioritaires en cours */}
+          <div className="bg-white border border-slate-200 rounded-md p-4 sm:p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-amber-50 text-amber-600 rounded-xl">
+                <div className="p-2 bg-amber-50 text-amber-600 border border-amber-200 rounded-md">
                   <Clock size={18} />
                 </div>
                 <div>
@@ -189,7 +192,7 @@ export function Dashboard() {
               </div>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2 text-xs">
               {urgentTasks.length > 0 ? (
                 urgentTasks.map((task) => {
                   const priority = priorityConfig[task.priority];
@@ -197,10 +200,10 @@ export function Dashboard() {
                     <div
                       key={task.id}
                       onClick={() => navigate(`/projects/${task.projectId}`)}
-                      className="flex items-center justify-between p-3.5 rounded-xl border border-slate-100 hover:border-slate-200 bg-slate-50/50 hover:bg-white transition-all cursor-pointer group"
+                      className="flex items-center justify-between p-3 border border-slate-200 rounded-md bg-slate-50 hover:bg-white transition-colors cursor-pointer group"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                        <div className="w-2 h-2 bg-blue-600 rounded-xs shrink-0" />
                         <div className="min-w-0">
                           <p className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
                             {task.title}
@@ -212,7 +215,7 @@ export function Dashboard() {
                       </div>
                       
                       <div className="flex items-center gap-3 shrink-0">
-                        <span className={`badge ${priority.bgColor} ${priority.color} text-[10px] font-bold hidden xs:inline-block`}>
+                        <span className={`badge ${priority.bgColor} ${priority.color} hidden xs:inline-block`}>
                           {priority.label}
                         </span>
                         {task.assignedTo ? (
@@ -235,11 +238,12 @@ export function Dashboard() {
         </div>
 
         <div className="space-y-6 sm:space-y-8">
+          {/* Attention : Projets en retard */}
           {overdueProjects.length > 0 && (
-            <div className="bg-rose-50/70 border border-rose-200/90 rounded-2xl p-5 shadow-xs">
+            <div className="bg-rose-50 border border-rose-200 rounded-md p-4 sm:p-5">
               <div className="flex items-center gap-2.5 text-rose-700 font-bold mb-3">
-                <AlertCircle size={20} className="shrink-0" />
-                <h3 className="text-sm uppercase tracking-wider font-extrabold">
+                <AlertCircle size={18} className="shrink-0" />
+                <h3 className="text-xs uppercase tracking-wider font-extrabold">
                   Attention : Projets en Retard ({overdueProjects.length})
                 </h3>
               </div>
@@ -250,7 +254,7 @@ export function Dashboard() {
                     <div
                       key={proj.id}
                       onClick={() => navigate(`/projects/${proj.id}`)}
-                      className="bg-white rounded-xl p-3 border border-rose-200 hover:border-rose-300 transition-all cursor-pointer flex items-center justify-between"
+                      className="bg-white p-3 border border-rose-200 rounded-md hover:border-rose-300 transition-colors cursor-pointer flex items-center justify-between"
                     >
                       <div className="min-w-0 pr-2">
                         <p className="text-xs font-bold text-slate-900 truncate">{proj.title}</p>
@@ -266,9 +270,10 @@ export function Dashboard() {
             </div>
           )}
 
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
+          {/* Répartition des statuts */}
+          <div className="bg-white border border-slate-200 rounded-md p-4 sm:p-5">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+              <div className="p-2 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-md">
                 <TrendingUp size={18} />
               </div>
               <div>
@@ -281,61 +286,62 @@ export function Dashboard() {
               <div>
                 <div className="flex justify-between text-slate-700 mb-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className="w-2 h-2 rounded-xs bg-emerald-500" />
                     Actifs
                   </span>
                   <span className="font-bold">{activeCount} ({Math.round((activeCount / totalProjectsCount) * 100)}%)</span>
                 </div>
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(activeCount / totalProjectsCount) * 100}%` }} />
+                <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
+                  <div className="h-full bg-emerald-500 rounded-sm" style={{ width: `${(activeCount / totalProjectsCount) * 100}%` }} />
                 </div>
               </div>
 
               <div>
                 <div className="flex justify-between text-slate-700 mb-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                    <span className="w-2 h-2 rounded-xs bg-indigo-500" />
                     Terminés
                   </span>
                   <span className="font-bold">{completedCount} ({Math.round((completedCount / totalProjectsCount) * 100)}%)</span>
                 </div>
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${(completedCount / totalProjectsCount) * 100}%` }} />
+                <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
+                  <div className="h-full bg-indigo-500 rounded-sm" style={{ width: `${(completedCount / totalProjectsCount) * 100}%` }} />
                 </div>
               </div>
 
               <div>
                 <div className="flex justify-between text-slate-700 mb-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-blue-500" />
+                    <span className="w-2 h-2 rounded-xs bg-blue-500" />
                     Planification
                   </span>
                   <span className="font-bold">{planningCount} ({Math.round((planningCount / totalProjectsCount) * 100)}%)</span>
                 </div>
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(planningCount / totalProjectsCount) * 100}%` }} />
+                <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
+                  <div className="h-full bg-blue-500 rounded-sm" style={{ width: `${(planningCount / totalProjectsCount) * 100}%` }} />
                 </div>
               </div>
 
               <div>
                 <div className="flex justify-between text-slate-700 mb-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-amber-500" />
+                    <span className="w-2 h-2 rounded-xs bg-amber-500" />
                     En Pause
                   </span>
                   <span className="font-bold">{onHoldCount} ({Math.round((onHoldCount / totalProjectsCount) * 100)}%)</span>
                 </div>
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-amber-500 rounded-full" style={{ width: `${(onHoldCount / totalProjectsCount) * 100}%` }} />
+                <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
+                  <div className="h-full bg-amber-500 rounded-sm" style={{ width: `${(onHoldCount / totalProjectsCount) * 100}%` }} />
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
+          {/* Équipe */}
+          <div className="bg-white border border-slate-200 rounded-md p-4 sm:p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
+                <div className="p-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-md">
                   <CheckCircle2 size={18} />
                 </div>
                 <div>
@@ -361,13 +367,16 @@ export function Dashboard() {
                       <p className="text-[11px] text-slate-400 truncate">{member.role}</p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full shrink-0">
+                  <span className="badge bg-slate-100 text-slate-700 text-[10px]">
                     {member.role === 'Administrateur' || member.role === 'Admin' ? 'Admin' : 'Membre'}
                   </span>
                 </div>
               ))}
             </div>
           </div>
+
+          {/* Widget Finances */}
+          <BudgetSummary />
         </div>
       </div>
     </div>
