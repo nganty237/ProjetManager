@@ -1,4 +1,4 @@
-﻿import { useProjectStore } from '@/store/projectStore';
+import { useProjectStore } from '@/store/projectStore';
 import { StatsCards } from '@/components/Dashboard/StatsCards';
 import { BudgetSummary } from '@/components/Dashboard/BudgetSummary';
 import { UserAvatar } from '@/components/Common/UserAvatar';
@@ -270,6 +270,9 @@ export function Dashboard() {
             </div>
           )}
 
+          {/* Widget Finances */}
+          <BudgetSummary />
+
           {/* Répartition des statuts */}
           <div className="bg-white border border-slate-200 rounded-md p-4 sm:p-5">
             <div className="flex items-center gap-2.5 mb-4">
@@ -374,9 +377,6 @@ export function Dashboard() {
               ))}
             </div>
           </div>
-
-          {/* Widget Finances */}
-          <BudgetSummary />
         </div>
       </div>
     </div>
