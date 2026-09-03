@@ -86,26 +86,8 @@ export function BudgetOverview({ expenses, budget, compact = false }: BudgetOver
         </div>
       </div>
 
-      {/* Barre de progression */}
-      {allocated > 0 ? (
-        <div className="pt-2">
-          <div className="flex justify-between items-center text-xs text-slate-600 mb-1.5 font-medium">
-            <span>Taux de consommation</span>
-            <span className="font-extrabold text-slate-900">{rate.toFixed(1)}%</span>
-          </div>
-          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-700 ${barColor}`}
-              style={{ width: `${Math.min(rate, 100)}%` }}
-            />
-          </div>
-          <div className="flex justify-between text-[11px] text-slate-400 mt-1.5 font-medium">
-            <span>0 FCFA</span>
-            <span>{formatFCFA(allocated)}</span>
-          </div>
-        </div>
-      ) : (
-        <div className="text-center py-3 bg-slate-50 border border-dashed border-slate-200 rounded-md text-xs text-slate-400 font-medium">
+      {allocated === 0 && (
+        <div className="text-center py-2.5 bg-slate-50 border border-dashed border-slate-200 rounded-md text-xs text-slate-400 font-medium">
           Aucun budget alloué. Les dépenses sont actuellement enregistrées hors budget.
         </div>
       )}

@@ -19,6 +19,18 @@ export default {
           800: 'rgb(var(--brand-800) / <alpha-value>)',
           900: 'rgb(var(--brand-900) / <alpha-value>)',
         },
+        status: {
+          planification: '#6366F1',
+          'en-cours': '#2563EB',
+          'en-pause': '#D97706',
+          termine: '#16A34A',
+          annule: '#DC2626',
+          planning: '#6366F1',
+          active: '#2563EB',
+          'on-hold': '#D97706',
+          completed: '#16A34A',
+          cancelled: '#DC2626',
+        },
       },
       animation: {
         blob: "blob 7s infinite",

@@ -1,43 +1,48 @@
 import { useProjectStore } from '@/store/projectStore';
-import { TrendingUp, FolderKanban, CheckCircle2, PauseCircle, ListTodo } from 'lucide-react';
+import { getPortfolioFinancials } from '@/utils/budgetUtils';
+import { formatFCFACompact } from '@/utils/budgetConstants';
+import { TrendingUp, FolderKanban, CheckCircle2, Wallet, CreditCard } from 'lucide-react';
 
 /**
  * Metric KPI card component displaying project overview counters.
  */
 export function StatsCards() {
   const stats = useProjectStore((state) => state.getProjectStats());
+  const projects = useProjectStore((state) => state.projects);
+  const fin = getPortfolioFinancials(projects);
   
   const cards = [
     {
       title: 'Total Projets',
       value: stats.total,
       icon: FolderKanban,
-      iconBg: 'bg-blue-600 text-white',
+      iconStyle: 'bg-[#2563EB] text-white',
     },
     {
       title: 'Projets Actifs',
       value: stats.active,
       icon: TrendingUp,
-      iconBg: 'bg-emerald-600 text-white',
+      iconStyle: 'bg-[#2563EB] text-white',
     },
     {
       title: 'Projets Terminés',
       value: stats.completed,
       icon: CheckCircle2,
-      iconBg: 'bg-indigo-600 text-white',
+      iconStyle: 'bg-[#16A34A] text-white',
     },
     {
-      title: 'En Pause',
-      value: stats.onHold,
-      icon: PauseCircle,
-      iconBg: 'bg-amber-600 text-white',
+      title: 'Budget Total',
+      value: fin.totalAllocated > 0 ? formatFCFACompact(fin.totalAllocated) : '0 FCFA',
+      icon: Wallet,
+      iconStyle: 'bg-[#D97706] text-white',
+      subtitle: `${fin.projectsWithBudget} projet${fin.projectsWithBudget > 1 ? 's' : ''} budgétisé${fin.projectsWithBudget > 1 ? 's' : ''}`,
     },
     {
-      title: 'Tâches',
-      value: `${stats.completedTasks} / ${stats.totalTasks}`,
-      icon: ListTodo,
-      iconBg: 'bg-slate-700 text-white',
-      subtitle: 'Tâches terminées',
+      title: 'Total Dépensé',
+      value: fin.totalSpent > 0 ? formatFCFACompact(fin.totalSpent) : '0 FCFA',
+      icon: CreditCard,
+      iconStyle: 'bg-[#6366F1] text-white',
+      subtitle: fin.totalAllocated > 0 ? `${fin.consumptionRate.toFixed(1)}% consommé` : 'Aucun budget défini',
     },
   ];
   
@@ -54,8 +59,8 @@ export function StatsCards() {
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
                 {card.title}
               </span>
-              <div className={`p-2 rounded-md shrink-0 ${card.iconBg}`}>
-                <Icon size={16} />
+              <div className={`p-2 rounded-md shrink-0 ${card.iconStyle}`}>
+                <Icon size={18} />
               </div>
             </div>
             <div className="mt-3">
@@ -74,3 +79,4 @@ export function StatsCards() {
 }
 
 export default StatsCards;
+

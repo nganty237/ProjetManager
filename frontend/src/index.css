@@ -16,6 +16,13 @@
     --brand-800: 30 58 138;
     --brand-900: 15 23 42;
     
+    /* Couleurs de statuts */
+    --status-planification: #6366F1;
+    --status-en-cours: #2563EB;
+    --status-en-pause: #D97706;
+    --status-termine: #16A34A;
+    --status-annule: #DC2626;
+    
     --sidebar-bg: 255 255 255;
     --bg-body: 248 250 252;
     --bg-surface: 255 255 255;

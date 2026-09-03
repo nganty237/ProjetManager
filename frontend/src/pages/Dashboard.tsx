@@ -1,6 +1,6 @@
 import { useProjectStore } from '@/store/projectStore';
 import { StatsCards } from '@/components/Dashboard/StatsCards';
-import { BudgetSummary } from '@/components/Dashboard/BudgetSummary';
+
 import { UserAvatar } from '@/components/Common/UserAvatar';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -37,10 +37,11 @@ export function Dashboard() {
     .slice(0, 5);
 
   const totalProjectsCount = projects.length || 1;
-  const activeCount = projects.filter((p) => p.status === 'active').length;
-  const completedCount = projects.filter((p) => p.status === 'completed').length;
   const planningCount = projects.filter((p) => p.status === 'planning').length;
+  const activeCount = projects.filter((p) => p.status === 'active').length;
   const onHoldCount = projects.filter((p) => p.status === 'on-hold').length;
+  const completedCount = projects.filter((p) => p.status === 'completed').length;
+  const cancelledCount = projects.filter((p) => p.status === 'cancelled').length;
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -71,7 +72,7 @@ export function Dashboard() {
           <div className="bg-white border border-slate-200 rounded-md overflow-hidden">
             <div className="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-md">
+                <div className="p-2 bg-[#2563EB] text-white rounded-md shrink-0">
                   <Layers size={18} />
                 </div>
                 <div>
@@ -181,7 +182,7 @@ export function Dashboard() {
           <div className="bg-white border border-slate-200 rounded-md p-4 sm:p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-amber-50 text-amber-600 border border-amber-200 rounded-md">
+                <div className="p-2 bg-[#D97706] text-white rounded-md shrink-0">
                   <Clock size={18} />
                 </div>
                 <div>
@@ -240,11 +241,16 @@ export function Dashboard() {
           {/* Attention : Projets en retard */}
           {overdueProjects.length > 0 && (
             <div className="bg-white border border-slate-200 rounded-md p-4 sm:p-5">
-              <div className="flex items-center gap-2 text-rose-600 font-bold mb-3">
-                <AlertCircle size={18} className="shrink-0" />
-                <h3 className="text-xs uppercase tracking-wider font-extrabold">
-                  Attention : Projets en Retard ({overdueProjects.length})
-                </h3>
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="p-2 bg-[#DC2626] text-white rounded-md shrink-0">
+                  <AlertCircle size={18} />
+                </div>
+                <div>
+                  <h3 className="text-xs uppercase tracking-wider font-extrabold text-slate-900">
+                    Projets en Retard ({overdueProjects.length})
+                  </h3>
+                  <p className="text-[11px] text-rose-600 font-semibold">Nécessite une action immédiate</p>
+                </div>
               </div>
               <div className="space-y-2">
                 {overdueProjects.map((proj) => {
@@ -269,13 +275,10 @@ export function Dashboard() {
             </div>
           )}
 
-          {/* Widget Finances */}
-          <BudgetSummary />
-
           {/* Répartition des statuts */}
           <div className="bg-white border border-slate-200 rounded-md p-4 sm:p-5">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="p-2 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-md">
+              <div className="p-2 bg-[#6366F1] text-white rounded-md shrink-0">
                 <TrendingUp size={18} />
               </div>
               <div>
@@ -288,54 +291,69 @@ export function Dashboard() {
               <div>
                 <div className="flex justify-between text-slate-700 mb-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    Actifs
-                  </span>
-                  <span className="font-bold">{activeCount} ({Math.round((activeCount / totalProjectsCount) * 100)}%)</span>
-                </div>
-                <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-sm" style={{ width: `${(activeCount / totalProjectsCount) * 100}%` }} />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-slate-700 mb-1">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-indigo-500" />
-                    Terminés
-                  </span>
-                  <span className="font-bold">{completedCount} ({Math.round((completedCount / totalProjectsCount) * 100)}%)</span>
-                </div>
-                <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
-                  <div className="h-full bg-indigo-500 rounded-sm" style={{ width: `${(completedCount / totalProjectsCount) * 100}%` }} />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-slate-700 mb-1">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-blue-500" />
+                    <span className="w-2 h-2 rounded-full bg-[#6366F1]" />
                     Planification
                   </span>
                   <span className="font-bold">{planningCount} ({Math.round((planningCount / totalProjectsCount) * 100)}%)</span>
                 </div>
                 <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
-                  <div className="h-full bg-blue-500 rounded-sm" style={{ width: `${(planningCount / totalProjectsCount) * 100}%` }} />
+                  <div className="h-full bg-[#6366F1] rounded-sm" style={{ width: `${(planningCount / totalProjectsCount) * 100}%` }} />
                 </div>
               </div>
 
               <div>
                 <div className="flex justify-between text-slate-700 mb-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-amber-500" />
-                    En Pause
+                    <span className="w-2 h-2 rounded-full bg-[#2563EB]" />
+                    En cours
+                  </span>
+                  <span className="font-bold">{activeCount} ({Math.round((activeCount / totalProjectsCount) * 100)}%)</span>
+                </div>
+                <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
+                  <div className="h-full bg-[#2563EB] rounded-sm" style={{ width: `${(activeCount / totalProjectsCount) * 100}%` }} />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-slate-700 mb-1">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#D97706]" />
+                    En pause
                   </span>
                   <span className="font-bold">{onHoldCount} ({Math.round((onHoldCount / totalProjectsCount) * 100)}%)</span>
                 </div>
                 <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
-                  <div className="h-full bg-amber-500 rounded-sm" style={{ width: `${(onHoldCount / totalProjectsCount) * 100}%` }} />
+                  <div className="h-full bg-[#D97706] rounded-sm" style={{ width: `${(onHoldCount / totalProjectsCount) * 100}%` }} />
                 </div>
               </div>
+
+              <div>
+                <div className="flex justify-between text-slate-700 mb-1">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#16A34A]" />
+                    Terminés
+                  </span>
+                  <span className="font-bold">{completedCount} ({Math.round((completedCount / totalProjectsCount) * 100)}%)</span>
+                </div>
+                <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
+                  <div className="h-full bg-[#16A34A] rounded-sm" style={{ width: `${(completedCount / totalProjectsCount) * 100}%` }} />
+                </div>
+              </div>
+
+              {cancelledCount > 0 && (
+                <div>
+                  <div className="flex justify-between text-slate-700 mb-1">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-[#DC2626]" />
+                      Annulés
+                    </span>
+                    <span className="font-bold">{cancelledCount} ({Math.round((cancelledCount / totalProjectsCount) * 100)}%)</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
+                    <div className="h-full bg-[#DC2626] rounded-sm" style={{ width: `${(cancelledCount / totalProjectsCount) * 100}%` }} />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import {
-  User, Mail, Shield, Edit3, Save, X, Camera,
-  FolderOpen, CheckCircle, LogOut, AlertCircle
+  Shield, Edit3, Save,
+  LogOut, AlertCircle, CheckCircle
 } from 'lucide-react';
 import api from '@/utils/api';
 import { UserAvatar } from '@/components/Common/UserAvatar';
@@ -14,8 +14,6 @@ interface UserProfile {
   email: string;
   role: string;
   avatar?: string;
-  projects?: { id: string; title: string; status: string }[];
-  Tasks?: { id: string; title: string; status: string }[];
 }
 
 export function Profile() {
@@ -29,6 +27,7 @@ export function Profile() {
   const [success, setSuccess] = useState('');
   const [editData, setEditData] = useState({ name: '', avatar: '' });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -44,6 +43,15 @@ export function Profile() {
       setError('Impossible de charger le profil');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+      setEditing(true);
     }
   };
 
@@ -71,6 +79,8 @@ export function Profile() {
       updateUser(updatedUser);
       setSuccess('Profil mis à jour avec succès !');
       setEditing(false);
+      setAvatarPreview(null);
+      setAvatarFile(null);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Erreur lors de la mise à jour');
     } finally {
@@ -78,16 +88,19 @@ export function Profile() {
     }
   };
 
+  const handleCancel = () => {
+    if (profile) {
+      setEditData({ name: profile.name, avatar: profile.avatar || '' });
+    }
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    setEditing(false);
+    setError('');
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/login');
-  };
-
-  const getRoleBadge = (role: string) => {
-    if (role === 'Administrateur') {
-      return 'text-amber-600 font-bold';
-    }
-    return 'text-blue-600 font-bold';
   };
 
   if (loading) {
@@ -107,204 +120,156 @@ export function Profile() {
     );
   }
 
-  const completedTasks = profile.Tasks?.filter((t) => t.status === 'done').length ?? 0;
-  const totalTasks = profile.Tasks?.length ?? 0;
-  const totalProjects = profile.projects?.length ?? 0;
-
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6">
+      {/* Header bar */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">Mon Profil</h1>
-          <p className="text-slate-500 mt-1 text-sm">Gérez vos informations personnelles</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Mon Profil</h1>
+          <p className="text-slate-500 mt-0.5 text-xs sm:text-sm">Gérez vos informations personnelles</p>
         </div>
         <button
           onClick={handleLogout}
-          className="btn btn-secondary flex items-center gap-2 text-rose-600 hover:bg-rose-50 border-rose-200"
+          className="btn btn-secondary flex items-center gap-2 text-rose-600 hover:bg-rose-50 border-rose-200 text-xs sm:text-sm px-3 py-1.5 rounded-lg"
         >
-          <LogOut size={18} />
+          <LogOut size={16} />
           <span className="hidden sm:inline">Déconnexion</span>
         </button>
       </div>
 
       {error && (
-        <div className="bg-rose-50 text-rose-700 p-3.5 rounded-md flex items-center gap-3 text-xs font-semibold border border-rose-200">
+        <div className="bg-rose-50 text-rose-700 p-3.5 rounded-lg flex items-center gap-3 text-xs font-semibold border border-rose-200">
           <AlertCircle size={18} className="shrink-0" />
           {error}
         </div>
       )}
       {success && (
-        <div className="bg-emerald-50 text-emerald-700 p-3.5 rounded-md flex items-center gap-3 text-xs font-semibold border border-emerald-200">
+        <div className="bg-emerald-50 text-emerald-700 p-3.5 rounded-lg flex items-center gap-3 text-xs font-semibold border border-emerald-200">
           <CheckCircle size={18} className="shrink-0" />
           {success}
         </div>
       )}
 
-      {/* Carte principale */}
-      <div className="card">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-          {/* Avatar */}
-          <div className="relative">
-            <UserAvatar name={profile.name} avatar={profile.avatar} size="xl" className="w-24 h-24 text-2xl" />
-            {editing && (
-              <div 
-                className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded border border-slate-300 flex items-center justify-center text-slate-600 cursor-pointer hover:bg-slate-50"
-                onClick={() => fileInputRef.current?.click()}
-                title="Changer d'avatar"
-              >
-                <Camera size={14} />
-              </div>
-            )}
-          </div>
+      {/* Card principale - Style Profile Information */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
+        <div>
+          <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
+            Profile information
+          </h2>
+        </div>
 
-          {/* Informations */}
-          <div className="flex-1 text-center sm:text-left">
-            {editing ? (
-              <div className="space-y-3">
-                <div>
-                  <label className="label text-left">Nom complet</label>
-                  <input
-                    id="profile-name"
-                    type="text"
-                    className="input"
-                    value={editData.name}
-                    onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="label text-left">URL de l'avatar (optionnel)</label>
-                  <input
-                    id="profile-avatar"
-                    type="url"
-                    className="input mb-2"
-                    placeholder="https://..."
-                    value={editData.avatar}
-                    onChange={(e) => setEditData({ ...editData, avatar: e.target.value })}
-                  />
-                  <div className="text-center text-xs font-semibold text-slate-400 my-2">— OU —</div>
-                  <label className="label text-left">Télécharger une image depuis votre PC</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    ref={fileInputRef}
-                    className="block w-full text-sm text-slate-500
-                      file:mr-4 file:py-2 file:px-4
-                      file:rounded-md file:border-0
-                      file:text-xs file:font-semibold
-                      file:bg-blue-50 file:text-blue-700
-                      hover:file:bg-blue-100 border border-slate-300 rounded-md p-1"
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files[0]) {
-                        setAvatarFile(e.target.files[0]);
-                        setEditData({ ...editData, avatar: '' });
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            ) : (
-              <>
-                <h2 className="text-2xl font-extrabold text-slate-900">{profile.name}</h2>
-                <div className="flex items-center justify-center sm:justify-start gap-2 mt-1">
-                  <Mail size={14} className="text-slate-400" />
-                  <span className="text-slate-600 text-sm">{profile.email}</span>
-                </div>
-              </>
-            )}
-
-            {/* Badge rôle */}
-            <div className="mt-3 flex items-center justify-center sm:justify-start gap-1.5 text-xs">
-              <Shield size={14} className="text-slate-400" />
-              <span className={getRoleBadge(profile.role)}>
-                {profile.role}
-              </span>
+        {/* Ligne 1: Profile photo */}
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-slate-700 block">
+            Profile
+          </label>
+          <div className="flex items-center gap-3.5">
+            <div className="relative shrink-0">
+              <UserAvatar
+                name={profile.name}
+                avatar={avatarPreview || profile.avatar}
+                size="lg"
+                className="w-14 h-14 text-lg border border-slate-200 shadow-xs"
+              />
             </div>
-          </div>
+            
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={handleFileChange}
+            />
 
-          {/* Actions */}
-          <div className="flex gap-2">
-            {editing ? (
-              <>
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="btn btn-primary flex items-center gap-2"
-                >
-                  {saving ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Save size={16} />
-                  )}
-                  Sauvegarder
-                </button>
-                <button onClick={() => setEditing(false)} className="btn btn-secondary">
-                  <X size={16} />
-                </button>
-              </>
-            ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold px-3.5 py-2 rounded-lg transition-colors cursor-pointer border border-slate-200/60"
+            >
+              Upload photo
+            </button>
+          </div>
+        </div>
+
+        {/* Ligne 2: Display name */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-slate-700 block">
+            Display name
+          </label>
+          {editing ? (
+            <input
+              type="text"
+              value={editData.name}
+              onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+              className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all shadow-xs"
+              placeholder="Votre nom complet"
+              autoFocus
+            />
+          ) : (
+            <div className="w-full bg-slate-50/70 border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 font-medium">
+              {profile.name}
+            </div>
+          )}
+        </div>
+
+        {/* Ligne 3: Email */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-slate-700 block">
+            Email
+          </label>
+          <div className="w-full bg-slate-50/70 border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-600">
+            {profile.email}
+          </div>
+        </div>
+
+        {/* Ligne 4: Rôle */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold text-slate-700 block">
+            Rôle
+          </label>
+          <div className="w-full bg-slate-50/70 border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 flex items-center gap-2">
+            <Shield size={15} className="text-slate-400" />
+            <span className="font-semibold text-slate-700">{profile.role}</span>
+          </div>
+        </div>
+
+        {/* Boutons d'action */}
+        <div className="pt-2">
+          {editing ? (
+            <div className="flex items-center gap-3">
               <button
-                id="profile-edit"
-                onClick={() => { setEditing(true); setSuccess(''); }}
-                className="btn btn-secondary flex items-center gap-2"
+                onClick={handleSave}
+                disabled={saving}
+                className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm px-6 py-2.5 rounded-lg transition-colors cursor-pointer shadow-sm flex items-center gap-2 disabled:opacity-50"
               >
-                <Edit3 size={16} />
-                Modifier
+                {saving ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Save size={15} />
+                )}
+                Save
               </button>
-            )}
-          </div>
+              <button
+                onClick={handleCancel}
+                className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors cursor-pointer"
+              >
+                Annuler
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => { setEditing(true); setSuccess(''); }}
+              className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm px-6 py-2.5 rounded-lg transition-colors cursor-pointer shadow-sm flex items-center gap-2"
+            >
+              <Edit3 size={15} />
+              Modifier
+            </button>
+          )}
         </div>
       </div>
-
-      {/* Statistiques */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="card text-center">
-          <div className="text-3xl font-extrabold text-blue-600">{totalProjects}</div>
-          <div className="text-xs text-slate-500 mt-1 flex items-center justify-center gap-1 font-semibold">
-            <FolderOpen size={14} />
-            Projets
-          </div>
-        </div>
-        <div className="card text-center">
-          <div className="text-3xl font-extrabold text-emerald-600">{completedTasks}</div>
-          <div className="text-xs text-slate-500 mt-1 flex items-center justify-center gap-1 font-semibold">
-            <CheckCircle size={14} />
-            Tâches terminées
-          </div>
-        </div>
-        <div className="card text-center">
-          <div className="text-3xl font-extrabold text-indigo-600">{totalTasks}</div>
-          <div className="text-xs text-slate-500 mt-1 flex items-center justify-center gap-1 font-semibold">
-            <User size={14} />
-            Total tâches
-          </div>
-        </div>
-      </div>
-
-      {/* Projets récents */}
-      {profile.projects && profile.projects.length > 0 && (
-        <div className="card">
-          <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <FolderOpen size={18} className="text-blue-600" />
-            Mes projets ({totalProjects})
-          </h3>
-          <div className="space-y-2">
-            {profile.projects.map((project) => (
-              <div key={project.id} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
-                <span className="text-sm font-semibold text-slate-800">{project.title}</span>
-                <span className={`badge text-xs ${
-                  project.status === 'completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                  project.status === 'active' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                  'bg-slate-100 text-slate-700 border-slate-200'
-                }`}>
-                  {project.status}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
 export default Profile;
+

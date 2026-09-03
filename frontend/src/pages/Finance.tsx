@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useProjectStore } from '@/store/projectStore';
 import { useAuthStore } from '@/store/authStore';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { formatFCFACompact } from '@/utils/budgetConstants';
 import {
   getPortfolioFinancials,
@@ -13,7 +13,6 @@ import {
 import { BudgetOverview } from '@/components/Budget/BudgetOverview';
 import { ExpenseList } from '@/components/Budget/ExpenseList';
 import { ExpenseForm } from '@/components/Budget/ExpenseForm';
-import { BudgetChart } from '@/components/Budget/BudgetChart';
 import { 
   Wallet, 
   TrendingUp, 
@@ -37,11 +36,23 @@ import { statusConfig } from '@/utils/constants';
  */
 export function Finance() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const queryProjectId = searchParams.get('projectId');
   const { user } = useAuthStore();
   const { projects, setBudget, addExpense, updateExpense } = useProjectStore();
   const isAdmin = user?.role === 'Administrateur';
 
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(() => projects[0]?.id ?? null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(() => {
+    return queryProjectId || (projects[0]?.id ?? null);
+  });
+
+  useEffect(() => {
+    if (queryProjectId) {
+      setSelectedProjectId(queryProjectId);
+    } else if (!selectedProjectId && projects.length > 0) {
+      setSelectedProjectId(projects[0].id);
+    }
+  }, [queryProjectId, projects]);
   const [projectSearch, setProjectSearch] = useState('');
   const [projectFilter, setProjectFilter] = useState<'all' | 'budgeted' | 'alerts'>('all');
   const [showExpenseForm, setShowExpenseForm] = useState(false);
@@ -113,28 +124,28 @@ export function Finance() {
             value: fin.totalAllocated > 0 ? formatFCFACompact(fin.totalAllocated) : '0 FCFA',
             sub: `${fin.projectsWithBudget} sur ${projects.length} projet${projects.length > 1 ? 's' : ''} budgétisé${fin.projectsWithBudget > 1 ? 's' : ''}`,
             icon: Wallet,
-            iconBg: 'bg-blue-600 text-white',
+            iconStyle: 'bg-[#2563EB] text-white',
           },
           {
             label: 'Total Dépensé',
             value: formatFCFACompact(fin.totalSpent),
             sub: fin.totalAllocated > 0 ? `${fin.consumptionRate.toFixed(1)}% du budget total` : 'Dépenses enregistrées',
             icon: TrendingUp,
-            iconBg: 'bg-emerald-600 text-white',
+            iconStyle: 'bg-[#16A34A] text-white',
           },
           {
             label: 'Budget Restant',
             value: fin.totalAllocated > 0 ? formatFCFACompact(fin.totalRemaining) : '—',
             sub: fin.totalRemaining < 0 ? 'Dépassement global' : 'Solde disponible',
             icon: CheckCircle,
-            iconBg: fin.totalRemaining < 0 ? 'bg-rose-600 text-white' : 'bg-indigo-600 text-white',
+            iconStyle: fin.totalRemaining < 0 ? 'bg-[#DC2626] text-white' : 'bg-[#6366F1] text-white',
           },
           {
             label: 'Projets en Alerte',
             value: String(fin.projectsOverBudget + fin.projectsInWarning),
             sub: `${fin.projectsOverBudget} dépassé${fin.projectsOverBudget > 1 ? 's' : ''}, ${fin.projectsInWarning} sous tension`,
             icon: AlertTriangle,
-            iconBg: (fin.projectsOverBudget + fin.projectsInWarning) > 0 ? 'bg-amber-600 text-white' : 'bg-slate-700 text-white',
+            iconStyle: (fin.projectsOverBudget + fin.projectsInWarning) > 0 ? 'bg-[#D97706] text-white' : 'bg-slate-700 text-white',
           },
         ].map((kpi) => {
           const Icon = kpi.icon;
@@ -142,8 +153,8 @@ export function Finance() {
             <div key={kpi.label} className="bg-white border border-slate-200 rounded-md p-4 sm:p-5 flex flex-col justify-between shadow-xs">
               <div className="flex items-start justify-between gap-2 mb-3">
                 <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">{kpi.label}</p>
-                <div className={`p-2 rounded-md shrink-0 ${kpi.iconBg}`}>
-                  <Icon size={16} />
+                <div className={`p-2 rounded-md shrink-0 ${kpi.iconStyle}`}>
+                  <Icon size={18} />
                 </div>
               </div>
               <div>
@@ -377,14 +388,6 @@ export function Finance() {
 
               {/* Vue d'ensemble du budget */}
               <BudgetOverview expenses={expenses} budget={selectedProject.budget} />
-
-              {/* Répartition par catégorie */}
-              <div className="bg-white border border-slate-200 rounded-md p-4 sm:p-5 shadow-xs">
-                <h4 className="font-bold text-slate-900 text-xs sm:text-sm uppercase tracking-wider mb-4">
-                  Répartition par catégorie
-                </h4>
-                <BudgetChart expenses={expenses} budget={selectedProject.budget} />
-              </div>
 
               {/* Tableau des dépenses */}
               <div className="bg-white border border-slate-200 rounded-md p-4 sm:p-5 shadow-xs">

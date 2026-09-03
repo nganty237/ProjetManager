@@ -8,10 +8,11 @@ export function ProjectKanban() {
   const projects = useProjectStore((state) => state.getFilteredProjects());
 
   const columns = [
-    { id: 'planning', title: 'Planification', dotBg: 'bg-blue-600' },
-    { id: 'active', title: 'En cours', dotBg: 'bg-emerald-600' },
-    { id: 'on-hold', title: 'En pause', dotBg: 'bg-amber-600' },
-    { id: 'completed', title: 'Terminé', dotBg: 'bg-indigo-600' },
+    { id: 'planning', title: 'Planification', dotBg: 'bg-[#6366F1]' },
+    { id: 'active', title: 'En cours', dotBg: 'bg-[#2563EB]' },
+    { id: 'on-hold', title: 'En pause', dotBg: 'bg-[#D97706]' },
+    { id: 'completed', title: 'Terminé', dotBg: 'bg-[#16A34A]' },
+    { id: 'cancelled', title: 'Annulé', dotBg: 'bg-[#DC2626]' },
   ];
 
   return (

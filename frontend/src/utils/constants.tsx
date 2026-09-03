@@ -12,39 +12,64 @@ import {
   Flame
 } from 'lucide-react';
 
+// Constantes des couleurs de statuts
+export const STATUS_COLORS = {
+  planification: '#6366F1',
+  'en-cours': '#2563EB',
+  'en-pause': '#D97706',
+  termine: '#16A34A',
+  annule: '#DC2626',
+  // Clés techniques
+  planning: '#6366F1',
+  active: '#2563EB',
+  'on-hold': '#D97706',
+  completed: '#16A34A',
+  cancelled: '#DC2626',
+} as const;
+
 // Configuration des statuts
 export const statusConfig: Record<
   ProjectStatus,
-  { label: string; color: string; bgColor: string; icon: React.ReactNode }
+  { label: string; color: string; bgColor: string; dotBg: string; hex: string; icon: React.ReactNode }
 > = {
   planning: {
     label: 'Planification',
-    color: 'text-blue-600',
-    bgColor: '',
+    color: 'text-[#6366F1]',
+    bgColor: 'bg-[#6366F1]/10',
+    dotBg: 'bg-[#6366F1]',
+    hex: '#6366F1',
     icon: <ClipboardList size={14} />,
   },
   active: {
     label: 'En cours',
-    color: 'text-emerald-600',
-    bgColor: '',
+    color: 'text-[#2563EB]',
+    bgColor: 'bg-[#2563EB]/10',
+    dotBg: 'bg-[#2563EB]',
+    hex: '#2563EB',
     icon: <Rocket size={14} />,
   },
   'on-hold': {
     label: 'En pause',
-    color: 'text-amber-600',
-    bgColor: '',
+    color: 'text-[#D97706]',
+    bgColor: 'bg-[#D97706]/10',
+    dotBg: 'bg-[#D97706]',
+    hex: '#D97706',
     icon: <PauseCircle size={14} />,
   },
   completed: {
     label: 'Terminé',
-    color: 'text-purple-600',
-    bgColor: '',
+    color: 'text-[#16A34A]',
+    bgColor: 'bg-[#16A34A]/10',
+    dotBg: 'bg-[#16A34A]',
+    hex: '#16A34A',
     icon: <CheckCircle2 size={14} />,
   },
   cancelled: {
     label: 'Annulé',
-    color: 'text-rose-600',
-    bgColor: '',
+    color: 'text-[#DC2626]',
+    bgColor: 'bg-[#DC2626]/10',
+    dotBg: 'bg-[#DC2626]',
+    hex: '#DC2626',
     icon: <XCircle size={14} />,
   },
 };
@@ -85,22 +110,30 @@ export const taskStatusConfig = {
   todo: {
     label: 'À faire',
     color: 'text-slate-500',
-    bgColor: '',
+    bgColor: 'bg-slate-100',
+    dotBg: 'bg-slate-400',
+    hex: '#64748B',
   },
   'in-progress': {
     label: 'En cours',
-    color: 'text-blue-600',
-    bgColor: '',
+    color: 'text-[#2563EB]',
+    bgColor: 'bg-[#2563EB]/10',
+    dotBg: 'bg-[#2563EB]',
+    hex: '#2563EB',
   },
   review: {
     label: 'En révision',
-    color: 'text-amber-600',
-    bgColor: '',
+    color: 'text-[#D97706]',
+    bgColor: 'bg-[#D97706]/10',
+    dotBg: 'bg-[#D97706]',
+    hex: '#D97706',
   },
   done: {
     label: 'Terminé',
-    color: 'text-emerald-600',
-    bgColor: '',
+    color: 'text-[#16A34A]',
+    bgColor: 'bg-[#16A34A]/10',
+    dotBg: 'bg-[#16A34A]',
+    hex: '#16A34A',
   },
 };
 
