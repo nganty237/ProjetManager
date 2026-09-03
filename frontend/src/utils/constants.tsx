@@ -19,32 +19,32 @@ export const statusConfig: Record<
 > = {
   planning: {
     label: 'Planification',
-    color: 'text-blue-700',
-    bgColor: 'bg-blue-100',
+    color: 'text-blue-600',
+    bgColor: '',
     icon: <ClipboardList size={14} />,
   },
   active: {
     label: 'En cours',
-    color: 'text-green-700',
-    bgColor: 'bg-green-100',
+    color: 'text-emerald-600',
+    bgColor: '',
     icon: <Rocket size={14} />,
   },
   'on-hold': {
     label: 'En pause',
-    color: 'text-yellow-700',
-    bgColor: 'bg-yellow-100',
+    color: 'text-amber-600',
+    bgColor: '',
     icon: <PauseCircle size={14} />,
   },
   completed: {
     label: 'Terminé',
-    color: 'text-purple-700',
-    bgColor: 'bg-purple-100',
+    color: 'text-purple-600',
+    bgColor: '',
     icon: <CheckCircle2 size={14} />,
   },
   cancelled: {
     label: 'Annulé',
-    color: 'text-red-700',
-    bgColor: 'bg-red-100',
+    color: 'text-rose-600',
+    bgColor: '',
     icon: <XCircle size={14} />,
   },
 };
@@ -56,26 +56,26 @@ export const priorityConfig: Record<
 > = {
   low: {
     label: 'Basse',
-    color: 'text-gray-700',
-    bgColor: 'bg-gray-100',
+    color: 'text-slate-500',
+    bgColor: '',
     icon: <ArrowDown size={14} />,
   },
   medium: {
     label: 'Moyenne',
-    color: 'text-blue-700',
-    bgColor: 'bg-blue-100',
+    color: 'text-blue-600',
+    bgColor: '',
     icon: <ArrowRight size={14} />,
   },
   high: {
     label: 'Haute',
-    color: 'text-orange-700',
-    bgColor: 'bg-orange-100',
+    color: 'text-amber-600',
+    bgColor: '',
     icon: <ArrowUp size={14} />,
   },
   critical: {
     label: 'Critique',
-    color: 'text-red-700',
-    bgColor: 'bg-red-100',
+    color: 'text-rose-600',
+    bgColor: '',
     icon: <Flame size={14} />,
   },
 };
@@ -84,23 +84,23 @@ export const priorityConfig: Record<
 export const taskStatusConfig = {
   todo: {
     label: 'À faire',
-    color: 'text-gray-700',
-    bgColor: 'bg-gray-100',
+    color: 'text-slate-500',
+    bgColor: '',
   },
   'in-progress': {
     label: 'En cours',
-    color: 'text-blue-700',
-    bgColor: 'bg-blue-100',
+    color: 'text-blue-600',
+    bgColor: '',
   },
   review: {
     label: 'En révision',
-    color: 'text-yellow-700',
-    bgColor: 'bg-yellow-100',
+    color: 'text-amber-600',
+    bgColor: '',
   },
   done: {
     label: 'Terminé',
-    color: 'text-green-700',
-    bgColor: 'bg-green-100',
+    color: 'text-emerald-600',
+    bgColor: '',
   },
 };
 

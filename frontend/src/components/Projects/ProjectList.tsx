@@ -53,14 +53,14 @@ export function ProjectList() {
 
               {/* STATUT */}
               <div className="col-span-2">
-                <span className={`badge ${status.bgColor} ${status.color}`}>
+                <span className={`inline-flex items-center gap-1.5 font-semibold ${status.color}`}>
                   {status.icon} {status.label}
                 </span>
               </div>
 
               {/* PRIORITÉ */}
               <div className="col-span-2">
-                <span className={`badge ${priority.bgColor} ${priority.color}`}>
+                <span className={`inline-flex items-center gap-1.5 font-semibold ${priority.color}`}>
                   {priority.label}
                 </span>
               </div>

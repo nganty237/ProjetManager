@@ -27,7 +27,7 @@ export function ProjectKanban() {
             {/* Header */}
             <div className="flex items-center justify-between p-2.5 rounded-md border border-slate-200 bg-white mb-3">
               <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-xs ${column.dotBg}`} />
+                <span className={`w-2 h-2 rounded-full ${column.dotBg}`} />
                 <h3 className="font-extrabold text-xs text-slate-800 uppercase tracking-wider">
                   {column.title}
                 </h3>

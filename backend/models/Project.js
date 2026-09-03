@@ -29,6 +29,10 @@ const Project = sequelize.define('Project', {
   endDate: {
     type: DataTypes.DATE,
   },
+  budgetAllocated: {
+    type: DataTypes.BIGINT,
+    defaultValue: 0,
+  },
 });
 
 export default Project;

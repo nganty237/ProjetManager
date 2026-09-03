@@ -10,6 +10,7 @@ import {
   Trash2,
   Users,
   Wallet,
+  FileDown,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
@@ -18,6 +19,7 @@ import {
   getDaysRemaining,
   isOverdue,
 } from '@/utils/constants';
+import { generateProjectPdfReport } from '@/utils/projectPdfReport';
 import { TaskCard } from '@/components/Tasks/TaskCard';
 import { TaskForm } from '@/components/Tasks/TaskForm';
 import { ProjectForm } from '@/components/Projects/ProjectForm';
@@ -42,9 +44,23 @@ export function ProjectDetail() {
   const [editingTask, setEditingTask] = useState<any>(null);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | undefined>(undefined);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const { addExpense, updateExpense } = useProjectStore();
   
   const project = id ? getProjectById(id) : null;
+
+  const handleExportPdf = () => {
+    if (!project) return;
+    try {
+      setIsExportingPdf(true);
+      generateProjectPdfReport(project);
+    } catch (err) {
+      console.error("Erreur lors de l'export PDF:", err);
+      alert("Une erreur est survenue lors de la génération du rapport PDF.");
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
   
   if (!project) {
     return (
@@ -130,42 +146,58 @@ export function ProjectDetail() {
           </div>
         </div>
         
-        {isAdmin && (
-          <div className="flex gap-2 sm:self-start">
-            <button
-              onClick={() => setShowProjectForm(true)}
-              className="btn btn-secondary flex-1 sm:flex-none flex items-center justify-center gap-2 text-sm"
-            >
-              <Edit size={18} />
-              Modifier
-            </button>
-            <button
-              onClick={handleDeleteProject}
-              className="btn btn-danger flex-1 sm:flex-none flex items-center justify-center gap-2 text-sm"
-            >
-              <Trash2 size={18} />
-              Supprimer
-            </button>
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2 sm:self-start">
+          <button
+            onClick={handleExportPdf}
+            disabled={isExportingPdf}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium flex-1 sm:flex-none flex items-center justify-center gap-2 text-sm px-3.5 py-2 rounded-lg transition-colors cursor-pointer disabled:opacity-50 shadow-sm"
+            title="Exporter le rapport exécutif du projet en PDF"
+          >
+            <FileDown size={17} className="text-white" />
+            <span>{isExportingPdf ? 'Export...' : 'Rapport PDF'}</span>
+          </button>
+
+          {isAdmin && (
+            <>
+              <button
+                onClick={() => setShowProjectForm(true)}
+                className="btn btn-secondary flex-1 sm:flex-none flex items-center justify-center gap-2 text-sm"
+              >
+                <Edit size={18} />
+                Modifier
+              </button>
+              <button
+                onClick={handleDeleteProject}
+                className="btn btn-danger flex-1 sm:flex-none flex items-center justify-center gap-2 text-sm"
+              >
+                <Trash2 size={18} />
+                Supprimer
+              </button>
+            </>
+          )}
+        </div>
       </div>
       
-      {/* Badges et alertes */}
-      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+      {/* Statut, priorité et alertes */}
+      <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm font-semibold">
         <StatusDropdown
           value={project.status}
           type="project"
           onChange={handleProjectStatusChange}
           disabled={!isAdmin}
         />
-        <span className={`badge ${priority.bgColor} ${priority.color} text-xs sm:text-sm flex items-center gap-1.5`}>
+        <span className="text-slate-300">•</span>
+        <span className={`inline-flex items-center gap-1.5 ${priority.color}`}>
           {priority.icon} {priority.label}
         </span>
         {overdue && (
-          <span className="badge bg-red-100 text-red-700 text-xs sm:text-sm flex items-center gap-1">
-            <AlertCircle size={14} />
-            Retard: {Math.abs(daysRemaining!)} j
-          </span>
+          <>
+            <span className="text-slate-300">•</span>
+            <span className="text-rose-600 font-bold inline-flex items-center gap-1">
+              <AlertCircle size={14} />
+              Retard: {Math.abs(daysRemaining!)} j
+            </span>
+          </>
         )}
       </div>
       

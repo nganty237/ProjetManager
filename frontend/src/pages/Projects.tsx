@@ -27,8 +27,8 @@ export function Projects() {
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Gestion des Projets
             </h1>
-            <span className="badge bg-slate-100 text-slate-700 text-xs rounded">
-              {projects.length}
+            <span className="text-xs font-semibold text-slate-500">
+              ({projects.length} projets)
             </span>
           </div>
           <p className="text-slate-500 text-xs sm:text-sm mt-1">

@@ -1,4 +1,4 @@
-import { useProjectStore } from '@/store/projectStore';
+﻿import { useProjectStore } from '@/store/projectStore';
 import { TrendingUp, FolderKanban, CheckCircle2, PauseCircle, ListTodo } from 'lucide-react';
 
 /**

@@ -71,6 +71,6 @@
   }
   
   .badge {
-    @apply px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider rounded border inline-flex items-center gap-1;
+    @apply text-xs font-semibold inline-flex items-center gap-1.5;
   }
 }

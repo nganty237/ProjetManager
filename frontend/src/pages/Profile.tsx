@@ -85,9 +85,9 @@ export function Profile() {
 
   const getRoleBadge = (role: string) => {
     if (role === 'Administrateur') {
-      return 'bg-amber-50 text-amber-800 border border-amber-200';
+      return 'text-amber-600 font-bold';
     }
-    return 'bg-blue-50 text-blue-800 border border-blue-200';
+    return 'text-blue-600 font-bold';
   };
 
   if (loading) {
@@ -213,9 +213,9 @@ export function Profile() {
             )}
 
             {/* Badge rôle */}
-            <div className="mt-3 flex items-center justify-center sm:justify-start gap-2">
-              <Shield size={14} className="text-slate-500" />
-              <span className={`badge ${getRoleBadge(profile.role)}`}>
+            <div className="mt-3 flex items-center justify-center sm:justify-start gap-1.5 text-xs">
+              <Shield size={14} className="text-slate-400" />
+              <span className={getRoleBadge(profile.role)}>
                 {profile.role}
               </span>
             </div>

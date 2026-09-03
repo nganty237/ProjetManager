@@ -39,11 +39,12 @@ export function ProjectCard({ project }: ProjectCardProps) {
           {project.description || 'Aucune description fournie.'}
         </p>
 
-        <div className="flex flex-wrap items-center gap-2 mb-3.5">
-          <span className={`badge ${status.bgColor} ${status.color}`}>
+        <div className="flex flex-wrap items-center gap-3 mb-3.5 text-xs font-semibold">
+          <span className={`inline-flex items-center gap-1.5 ${status.color}`}>
             {status.icon} {status.label}
           </span>
-          <span className={`badge ${priority.bgColor} ${priority.color}`}>
+          <span className="text-slate-300">•</span>
+          <span className={`inline-flex items-center gap-1.5 ${priority.color}`}>
             {priority.label}
           </span>
         </div>
@@ -57,12 +58,12 @@ export function ProjectCard({ project }: ProjectCardProps) {
               </span>
 
               {overdue ? (
-                <span className="text-rose-700 font-bold flex items-center gap-1 bg-rose-50 border border-rose-200 px-2 py-0.5 text-[11px] rounded">
+                <span className="text-rose-600 font-bold flex items-center gap-1 text-xs">
                   <AlertCircle size={13} />
                   Retard: {Math.abs(daysRemaining || 0)} j
                 </span>
               ) : daysRemaining !== null ? (
-                <span className="text-slate-600 font-medium bg-slate-50 border border-slate-200 px-2 py-0.5 text-[11px] rounded">
+                <span className="text-slate-500 font-medium text-xs">
                   {daysRemaining} j restants
                 </span>
               ) : null}

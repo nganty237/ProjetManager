@@ -2,21 +2,21 @@ import { useState } from 'react';
 import { Expense } from '@/types';
 import { expenseCategoryConfig, formatFCFA } from '@/utils/budgetConstants';
 import { useProjectStore } from '@/store/projectStore';
-import { Trash2, Edit3, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Trash2, Edit3, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatDate } from '@/utils/constants';
 
 interface ExpenseListProps {
   projectId: string;
   expenses: Expense[];
   isAdmin: boolean;
-  onAdd: () => void;
+  onAdd?: () => void;
   onEdit: (expense: Expense) => void;
 }
 
 /**
  * Tableau paginé et triable des dépenses d'un projet.
  */
-export function ExpenseList({ projectId, expenses, isAdmin, onAdd, onEdit }: ExpenseListProps) {
+export function ExpenseList({ projectId, expenses, isAdmin, onEdit }: ExpenseListProps) {
   const { deleteExpense } = useProjectStore();
   const [sortField, setSortField] = useState<'date' | 'amount' | 'category'>('date');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -47,19 +47,7 @@ export function ExpenseList({ projectId, expenses, isAdmin, onAdd, onEdit }: Exp
   };
 
   if (expenses.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-slate-400 border border-dashed border-slate-200 rounded-md">
-        <p className="text-sm font-medium mb-3">Aucune dépense enregistrée</p>
-        {isAdmin && (
-          <button
-            onClick={onAdd}
-            className="btn btn-primary text-xs flex items-center gap-1.5 rounded-md"
-          >
-            <Plus size={14} /> Ajouter la première dépense
-          </button>
-        )}
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -107,7 +95,7 @@ export function ExpenseList({ projectId, expenses, isAdmin, onAdd, onEdit }: Exp
                   )}
                 </td>
                 <td className="py-3 px-4">
-                  <span className={`badge ${cat.bgColor} ${cat.color} ${cat.borderColor} border flex items-center gap-1 w-fit rounded`}>
+                  <span className={`inline-flex items-center gap-1.5 font-semibold ${cat.color}`}>
                     {cat.icon} {cat.label}
                   </span>
                 </td>

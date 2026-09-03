@@ -21,4 +21,19 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Gérer l'expiration de session (Erreur 401)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Nettoyer la session expirée
+      localStorage.removeItem('auth-storage');
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/signup') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

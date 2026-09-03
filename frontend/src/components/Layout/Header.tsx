@@ -41,13 +41,11 @@ export function Header({ onMenuClick }: HeaderProps) {
           </button>
 
           <div className="flex items-center gap-2 shrink-0">
-            <span className="w-2 h-2 bg-blue-600" />
+            <span className="w-2 h-2 bg-blue-600 rounded-full" />
             <span className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight whitespace-nowrap">
               Espace de Travail
             </span>
           </div>
-
-          <div className="hidden md:block h-4 w-px bg-slate-200 shrink-0" />
 
           <div className="relative flex-1 max-w-xs hidden xs:block">
             <input
@@ -61,27 +59,27 @@ export function Header({ onMenuClick }: HeaderProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           <div className="relative">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="w-8 h-8 sm:w-9 sm:h-9 bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 transition-colors relative cursor-pointer"
+              className="p-2 hover:bg-slate-100 rounded-md flex items-center justify-center text-slate-600 hover:text-slate-900 transition-colors relative cursor-pointer"
               title="Notifications"
             >
-              <Bell size={16} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500" />
+              <Bell size={18} />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full" />
             </button>
 
             {showNotifications && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setShowNotifications(false)} />
-                <div className="absolute right-0 top-11 w-72 bg-white border border-slate-200 z-20 p-3 shadow-md">
+                <div className="absolute right-0 top-11 w-72 bg-white border border-slate-200 z-20 p-3 shadow-md rounded-md">
                   <div className="flex items-center justify-between pb-2 border-b border-slate-200 mb-2">
                     <span className="text-xs font-bold text-slate-900">Notifications</span>
-                    <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 border border-blue-200">Nouveau</span>
+                    <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 border border-blue-200 rounded">Nouveau</span>
                   </div>
                   <div className="space-y-2 text-xs">
-                    <div className="p-2 bg-slate-50 border border-slate-200">
+                    <div className="p-2 bg-slate-50 border border-slate-200 rounded-md">
                       <p className="font-semibold text-slate-800">Bienvenue dans votre espace</p>
                       <p className="text-[11px] text-slate-500 mt-0.5">Toutes les fonctionnalités sont prêtes.</p>
                     </div>
@@ -93,13 +91,11 @@ export function Header({ onMenuClick }: HeaderProps) {
 
           <button
             onClick={() => navigate('/settings')}
-            className="w-8 h-8 sm:w-9 sm:h-9 bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 transition-colors cursor-pointer hidden sm:flex"
+            className="p-2 hover:bg-slate-100 rounded-md flex items-center justify-center text-slate-600 hover:text-slate-900 transition-colors cursor-pointer hidden sm:flex"
             title="Aide & Réglages"
           >
-            <HelpCircle size={16} />
+            <HelpCircle size={18} />
           </button>
-
-          <div className="h-5 w-px bg-slate-200 mx-0.5 hidden sm:block" />
 
           <div className="relative">
             <button
@@ -120,12 +116,12 @@ export function Header({ onMenuClick }: HeaderProps) {
                   className="fixed inset-0 z-10"
                   onClick={() => setShowDropdown(false)}
                 />
-                <div className="absolute right-0 top-12 w-60 bg-white border border-slate-200 z-20 overflow-hidden p-2 shadow-md">
-                  <div className="px-3 py-2.5 bg-slate-50 mb-1.5 border border-slate-200">
+                <div className="absolute right-0 top-12 w-60 bg-white border border-slate-200 z-20 overflow-hidden p-2 shadow-md rounded-md">
+                  <div className="px-3 py-2.5 pb-2 mb-1.5 border-b border-slate-100">
                     <p className="text-xs font-bold text-slate-900 truncate">{user?.name}</p>
                     <p className="text-[11px] text-slate-500 truncate mt-0.5">{user?.email}</p>
-                    <span className={`mt-2 inline-block text-[10px] font-bold px-2 py-0.5 border uppercase tracking-wider ${
-                      user?.role === 'Administrateur' ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-blue-50 text-blue-800 border-blue-200'
+                    <span className={`mt-1.5 inline-block text-[10px] font-bold uppercase tracking-wider ${
+                      user?.role === 'Administrateur' ? 'text-amber-600' : 'text-blue-600'
                     }`}>
                       {user?.role ?? 'Membre'}
                     </span>

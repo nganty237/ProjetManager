@@ -1,4 +1,4 @@
-import { useProjectStore } from '@/store/projectStore';
+﻿import { useProjectStore } from '@/store/projectStore';
 import { StatsCards } from '@/components/Dashboard/StatsCards';
 import { BudgetSummary } from '@/components/Dashboard/BudgetSummary';
 import { UserAvatar } from '@/components/Common/UserAvatar';
@@ -123,13 +123,13 @@ export function Dashboard() {
                               </span>
                             </div>
                           </td>
-                          <td className="py-3.5 px-4">
-                            <span className={`badge ${status.bgColor} ${status.color}`}>
+                          <td className="py-3.5 px-4 font-semibold">
+                            <span className={status.color}>
                               {status.label}
                             </span>
                           </td>
-                          <td className="py-3.5 px-4">
-                            <span className={`badge ${priority.bgColor} ${priority.color}`}>
+                          <td className="py-3.5 px-4 font-semibold">
+                            <span className={priority.color}>
                               {priority.label}
                             </span>
                           </td>
@@ -203,7 +203,7 @@ export function Dashboard() {
                       className="flex items-center justify-between p-3 border border-slate-200 rounded-md bg-slate-50 hover:bg-white transition-colors cursor-pointer group"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-2 h-2 bg-blue-600 rounded-xs shrink-0" />
+                        <div className="w-2 h-2 bg-blue-600 rounded-full shrink-0" />
                         <div className="min-w-0">
                           <p className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
                             {task.title}
@@ -215,7 +215,7 @@ export function Dashboard() {
                       </div>
                       
                       <div className="flex items-center gap-3 shrink-0">
-                        <span className={`badge ${priority.bgColor} ${priority.color} hidden xs:inline-block`}>
+                        <span className={`text-xs font-semibold ${priority.color} hidden xs:inline-block`}>
                           {priority.label}
                         </span>
                         {task.assignedTo ? (
@@ -240,8 +240,8 @@ export function Dashboard() {
         <div className="space-y-6 sm:space-y-8">
           {/* Attention : Projets en retard */}
           {overdueProjects.length > 0 && (
-            <div className="bg-rose-50 border border-rose-200 rounded-md p-4 sm:p-5">
-              <div className="flex items-center gap-2.5 text-rose-700 font-bold mb-3">
+            <div className="bg-white border border-slate-200 rounded-md p-4 sm:p-5">
+              <div className="flex items-center gap-2 text-rose-600 font-bold mb-3">
                 <AlertCircle size={18} className="shrink-0" />
                 <h3 className="text-xs uppercase tracking-wider font-extrabold">
                   Attention : Projets en Retard ({overdueProjects.length})
@@ -254,15 +254,15 @@ export function Dashboard() {
                     <div
                       key={proj.id}
                       onClick={() => navigate(`/projects/${proj.id}`)}
-                      className="bg-white p-3 border border-rose-200 rounded-md hover:border-rose-300 transition-colors cursor-pointer flex items-center justify-between"
+                      className="bg-slate-50 hover:bg-slate-100 p-3 border border-slate-200 rounded-md transition-colors cursor-pointer flex items-center justify-between group"
                     >
                       <div className="min-w-0 pr-2">
-                        <p className="text-xs font-bold text-slate-900 truncate">{proj.title}</p>
+                        <p className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">{proj.title}</p>
                         <p className="text-[11px] text-rose-600 font-semibold mt-0.5">
                           En retard de {days} jours
                         </p>
                       </div>
-                      <ChevronRight size={14} className="text-rose-400 shrink-0" />
+                      <ChevronRight size={14} className="text-slate-300 group-hover:text-blue-600 transition-colors shrink-0" />
                     </div>
                   );
                 })}
@@ -286,7 +286,7 @@ export function Dashboard() {
               <div>
                 <div className="flex justify-between text-slate-700 mb-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-xs bg-emerald-500" />
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
                     Actifs
                   </span>
                   <span className="font-bold">{activeCount} ({Math.round((activeCount / totalProjectsCount) * 100)}%)</span>
@@ -299,7 +299,7 @@ export function Dashboard() {
               <div>
                 <div className="flex justify-between text-slate-700 mb-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-xs bg-indigo-500" />
+                    <span className="w-2 h-2 rounded-full bg-indigo-500" />
                     Terminés
                   </span>
                   <span className="font-bold">{completedCount} ({Math.round((completedCount / totalProjectsCount) * 100)}%)</span>
@@ -312,7 +312,7 @@ export function Dashboard() {
               <div>
                 <div className="flex justify-between text-slate-700 mb-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-xs bg-blue-500" />
+                    <span className="w-2 h-2 rounded-full bg-blue-500" />
                     Planification
                   </span>
                   <span className="font-bold">{planningCount} ({Math.round((planningCount / totalProjectsCount) * 100)}%)</span>
@@ -325,7 +325,7 @@ export function Dashboard() {
               <div>
                 <div className="flex justify-between text-slate-700 mb-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-xs bg-amber-500" />
+                    <span className="w-2 h-2 rounded-full bg-amber-500" />
                     En Pause
                   </span>
                   <span className="font-bold">{onHoldCount} ({Math.round((onHoldCount / totalProjectsCount) * 100)}%)</span>
@@ -367,7 +367,7 @@ export function Dashboard() {
                       <p className="text-[11px] text-slate-400 truncate">{member.role}</p>
                     </div>
                   </div>
-                  <span className="badge bg-slate-100 text-slate-700 text-[10px]">
+                  <span className={`text-[11px] font-semibold ${member.role === 'Administrateur' || member.role === 'Admin' ? 'text-amber-600' : 'text-slate-500'}`}>
                     {member.role === 'Administrateur' || member.role === 'Admin' ? 'Admin' : 'Membre'}
                   </span>
                 </div>

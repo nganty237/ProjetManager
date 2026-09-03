@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+﻿import { create } from 'zustand';
 import { Project, Task, TeamMember, ProjectFilters, ViewMode, Expense } from '@/types';
 import api from '@/utils/api';
 
@@ -23,11 +23,11 @@ interface ProjectStore {
   updateTask: (projectId: string, taskId: string, updates: Partial<Task>) => Promise<void>;
   deleteTask: (projectId: string, taskId: string) => Promise<void>;
   
-  // Budget & Expenses actions
-  setBudget: (projectId: string, allocated: number) => void;
-  addExpense: (projectId: string, expense: Omit<Expense, 'id' | 'projectId' | 'createdAt'>) => void;
-  updateExpense: (projectId: string, expenseId: string, updates: Partial<Expense>) => void;
-  deleteExpense: (projectId: string, expenseId: string) => void;
+  // Budget & Expenses actions (persisted via API)
+  setBudget: (projectId: string, allocated: number) => Promise<void>;
+  addExpense: (projectId: string, expense: Omit<Expense, 'id' | 'projectId' | 'createdAt'>) => Promise<void>;
+  updateExpense: (projectId: string, expenseId: string, updates: Partial<Expense>) => Promise<void>;
+  deleteExpense: (projectId: string, expenseId: string) => Promise<void>;
   
   setFilters: (filters: ProjectFilters) => void;
   setViewMode: (mode: ViewMode) => void;
@@ -47,19 +47,25 @@ interface ProjectStore {
   };
 }
 
-// Adapts MySQL naming conventions (Tasks/members) to frontend naming conventions (tasks/team)
+// Adapts MySQL naming conventions to frontend Project schema
 const adaptProject = (project: any | Project): Project => {
+  const budgetAllocated = project.budgetAllocated !== undefined 
+    ? Number(project.budgetAllocated) 
+    : project.budget?.allocated;
+
   return {
     ...project,
     tasks: project.tasks || project.Tasks || [],
     team: project.team || project.members || [],
-    expenses: project.expenses || [],
-    budget: project.budget || undefined,
+    expenses: (project.expenses || []).map((e: any) => ({
+      ...e,
+      projectId: e.ProjectId || e.projectId || project.id,
+      amount: Number(e.amount) || 0,
+      date: new Date(e.date || e.createdAt),
+    })),
+    budget: budgetAllocated !== undefined ? { allocated: budgetAllocated } : undefined,
   };
 };
-
-/** Génère un ID unique simple */
-const genId = () => `exp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
 export const useProjectStore = create<ProjectStore>((set, get) => ({
   // État initial
@@ -168,13 +174,14 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   
   updateTask: async (projectId, taskId, updates) => {
     try {
-      await api.put(`/tasks/${taskId}`, updates);
+      const response = await api.put(`/tasks/${taskId}`, updates);
+      const updatedTask = response.data.task || response.data;
       set((state) => ({
         projects: state.projects.map((project) =>
           project.id === projectId
             ? {
                 ...project,
-                tasks: project.tasks.map((t) => (t.id === taskId ? { ...t, ...updates } : t)),
+                tasks: project.tasks.map((t) => (t.id === taskId ? { ...t, ...updates, ...updatedTask } : t)),
               }
             : project
         ),
@@ -206,87 +213,124 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     }
   },
 
-  // ===== Actions Budget & Dépenses (frontend uniquement pour l'instant) =====
+  // ===== Actions Budget & Dépenses (Persistance API MySQL) =====
 
-  setBudget: (projectId, allocated) => {
-    set((state) => ({
-      projects: state.projects.map((p) =>
-        p.id === projectId
-          ? { ...p, budget: { allocated }, updatedAt: new Date() }
-          : p
-      ),
-      selectedProject:
-        state.selectedProject?.id === projectId
-          ? { ...state.selectedProject, budget: { allocated }, updatedAt: new Date() }
-          : state.selectedProject,
-    }));
+  setBudget: async (projectId, allocated) => {
+    try {
+      const numAllocated = Number(allocated) || 0;
+      await api.put(`/projects/${projectId}/budget`, { allocated: numAllocated });
+      set((state) => ({
+        projects: state.projects.map((p) =>
+          p.id === projectId
+            ? { ...p, budget: { allocated: numAllocated }, updatedAt: new Date() }
+            : p
+        ),
+        selectedProject:
+          state.selectedProject?.id === projectId
+            ? { ...state.selectedProject, budget: { allocated: numAllocated }, updatedAt: new Date() }
+            : state.selectedProject,
+      }));
+    } catch (error: any) {
+      const msg = error.response?.data?.message || error.message;
+      set({ error: `Erreur lors de la mise à jour du budget: ${msg}` });
+      console.error("Erreur lors de la mise à jour du budget", error);
+    }
   },
 
-  addExpense: (projectId, expenseData) => {
-    const newExpense: Expense = {
-      ...expenseData,
-      id: genId(),
-      projectId,
-      createdAt: new Date(),
-    };
-    set((state) => ({
-      projects: state.projects.map((p) =>
-        p.id === projectId
-          ? { ...p, expenses: [...(p.expenses || []), newExpense] }
-          : p
-      ),
-      selectedProject:
-        state.selectedProject?.id === projectId
-          ? {
-              ...state.selectedProject,
-              expenses: [...(state.selectedProject.expenses || []), newExpense],
-            }
-          : state.selectedProject,
-    }));
+  addExpense: async (projectId, expenseData) => {
+    try {
+      const response = await api.post(`/expenses/${projectId}`, expenseData);
+      const newExpense: Expense = {
+        ...response.data,
+        projectId: response.data.ProjectId || projectId,
+        amount: Number(response.data.amount) || 0,
+        date: new Date(response.data.date || response.data.createdAt),
+      };
+
+      set((state) => ({
+        projects: state.projects.map((p) =>
+          p.id === projectId
+            ? { ...p, expenses: [newExpense, ...(p.expenses || [])] }
+            : p
+        ),
+        selectedProject:
+          state.selectedProject?.id === projectId
+            ? {
+                ...state.selectedProject,
+                expenses: [newExpense, ...(state.selectedProject.expenses || [])],
+              }
+            : state.selectedProject,
+      }));
+    } catch (error: any) {
+      const msg = error.response?.data?.message || error.message;
+      set({ error: `Erreur lors de l'ajout de dépense: ${msg}` });
+      console.error("Erreur lors de l'ajout de dépense", error);
+    }
   },
 
-  updateExpense: (projectId, expenseId, updates) => {
-    set((state) => ({
-      projects: state.projects.map((p) =>
-        p.id === projectId
-          ? {
-              ...p,
-              expenses: (p.expenses || []).map((e) =>
-                e.id === expenseId ? { ...e, ...updates } : e
-              ),
-            }
-          : p
-      ),
-      selectedProject:
-        state.selectedProject?.id === projectId
-          ? {
-              ...state.selectedProject,
-              expenses: (state.selectedProject.expenses || []).map((e) =>
-                e.id === expenseId ? { ...e, ...updates } : e
-              ),
-            }
-          : state.selectedProject,
-    }));
+  updateExpense: async (projectId, expenseId, updates) => {
+    try {
+      const response = await api.put(`/expenses/${expenseId}`, updates);
+      const updatedExpense: Expense = {
+        ...response.data,
+        projectId: response.data.ProjectId || projectId,
+        amount: Number(response.data.amount) || 0,
+        date: new Date(response.data.date || response.data.createdAt),
+      };
+
+      set((state) => ({
+        projects: state.projects.map((p) =>
+          p.id === projectId
+            ? {
+                ...p,
+                expenses: (p.expenses || []).map((e) =>
+                  e.id === expenseId ? updatedExpense : e
+                ),
+              }
+            : p
+        ),
+        selectedProject:
+          state.selectedProject?.id === projectId
+            ? {
+                ...state.selectedProject,
+                expenses: (state.selectedProject.expenses || []).map((e) =>
+                  e.id === expenseId ? updatedExpense : e
+                ),
+              }
+            : state.selectedProject,
+      }));
+    } catch (error: any) {
+      const msg = error.response?.data?.message || error.message;
+      set({ error: `Erreur lors de la modification de la dépense: ${msg}` });
+      console.error("Erreur lors de la modification de la dépense", error);
+    }
   },
 
-  deleteExpense: (projectId, expenseId) => {
-    set((state) => ({
-      projects: state.projects.map((p) =>
-        p.id === projectId
-          ? {
-              ...p,
-              expenses: (p.expenses || []).filter((e) => e.id !== expenseId),
-            }
-          : p
-      ),
-      selectedProject:
-        state.selectedProject?.id === projectId
-          ? {
-              ...state.selectedProject,
-              expenses: (state.selectedProject.expenses || []).filter((e) => e.id !== expenseId),
-            }
-          : state.selectedProject,
-    }));
+  deleteExpense: async (projectId, expenseId) => {
+    try {
+      await api.delete(`/expenses/${expenseId}`);
+      set((state) => ({
+        projects: state.projects.map((p) =>
+          p.id === projectId
+            ? {
+                ...p,
+                expenses: (p.expenses || []).filter((e) => e.id !== expenseId),
+              }
+            : p
+        ),
+        selectedProject:
+          state.selectedProject?.id === projectId
+            ? {
+                ...state.selectedProject,
+                expenses: (state.selectedProject.expenses || []).filter((e) => e.id !== expenseId),
+              }
+            : state.selectedProject,
+      }));
+    } catch (error: any) {
+      const msg = error.response?.data?.message || error.message;
+      set({ error: `Erreur lors de la suppression de la dépense: ${msg}` });
+      console.error("Erreur lors de la suppression de la dépense", error);
+    }
   },
 
   // Actions - Filtres et Vue

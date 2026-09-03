@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 
 interface UserAvatarProps {
   name: string;
@@ -30,9 +30,9 @@ export function UserAvatar({
   const sizeMap = {
     xs: 'w-6 h-6 text-[10px]',
     sm: 'w-8 h-8 text-xs',
-    md: 'w-10 h-10 text-sm font-semibold',
-    lg: 'w-12 h-12 text-base font-bold',
-    xl: 'w-16 h-16 text-lg font-bold',
+    md: 'w-9 h-9 text-xs font-semibold',
+    lg: 'w-11 h-11 text-sm font-semibold',
+    xl: 'w-14 h-14 text-base font-bold',
   };
 
   const sizeClasses = sizeMap[size];
@@ -43,14 +43,14 @@ export function UserAvatar({
         src={avatar}
         alt={name || 'Utilisateur'}
         onError={() => setImageError(true)}
-        className={`${sizeClasses} object-cover shrink-0 rounded border border-slate-200 ${className}`}
+        className={`${sizeClasses} object-cover shrink-0 rounded-full border border-slate-200 ${className}`}
       />
     );
   }
 
   return (
     <div
-      className={`${sizeClasses} bg-slate-700 text-white flex items-center justify-center shrink-0 rounded border border-slate-600 ${className}`}
+      className={`${sizeClasses} bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 rounded-full border border-slate-200 font-medium ${className}`}
       title={name}
     >
       {getInitials(name)}

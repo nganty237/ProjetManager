@@ -42,7 +42,7 @@ export function StatusDropdown({
 
   if (disabled) {
     return (
-      <span className={`badge ${currentConfig.bgColor} ${currentConfig.color} ${className}`}>
+      <span className={`inline-flex items-center gap-1.5 font-semibold text-xs ${currentConfig.color} ${className}`}>
         {currentConfig.icon && <span className="shrink-0">{currentConfig.icon}</span>}
         <span>{currentConfig.label}</span>
       </span>
@@ -62,7 +62,7 @@ export function StatusDropdown({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`badge ${currentConfig.bgColor} ${currentConfig.color} cursor-pointer hover:opacity-90 transition-colors border border-black/5 ${className}`}
+        className={`inline-flex items-center gap-1.5 font-semibold text-xs ${currentConfig.color} cursor-pointer hover:opacity-80 transition-opacity ${className}`}
       >
         {currentConfig.icon && <span className="shrink-0">{currentConfig.icon}</span>}
         <span>{currentConfig.label}</span>
@@ -89,7 +89,7 @@ export function StatusDropdown({
                 }`}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className={`w-2 h-2 rounded-sm shrink-0 ${opt.bgColor} border border-black/10`} />
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${opt.bgColor} border border-black/10`} />
                   <span className="truncate">{opt.label}</span>
                 </div>
                 {isSelected && <Check size={14} className="text-blue-600 shrink-0 ml-1" />}

@@ -52,14 +52,15 @@ export function TaskCard({ task, onEdit, onDelete, onStatusChange }: TaskCardPro
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 mb-4">
+        <div className="flex flex-wrap items-center gap-3 mb-4 text-xs font-semibold">
           <StatusDropdown
             value={task.status}
             type="task"
             onChange={(newStatus) => onStatusChange(task.id, newStatus as Task['status'])}
             disabled={!canChangeStatus}
           />
-          <span className={`badge ${priority.bgColor} ${priority.color}`}>
+          <span className="text-slate-300">•</span>
+          <span className={`inline-flex items-center gap-1.5 ${priority.color}`}>
             {priority.icon} {priority.label}
           </span>
         </div>
