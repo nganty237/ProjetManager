@@ -361,9 +361,9 @@ export function Finance() {
                       ) : (
                         <button
                           onClick={startEditBudget}
-                          className="btn btn-secondary text-xs rounded-md flex items-center gap-1.5 px-3 py-1.5"
+                          className="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-300 font-bold text-xs rounded-md flex items-center gap-1.5 px-3 py-1.5 transition-colors cursor-pointer shadow-xs"
                         >
-                          <Edit3 size={13} />
+                          <Edit3 size={13} className="text-blue-600" />
                           {selectedProject.budget?.allocated ? 'Modifier le budget' : 'Définir un budget'}
                         </button>
                       )}
