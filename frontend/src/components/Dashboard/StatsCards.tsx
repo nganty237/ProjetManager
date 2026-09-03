@@ -1,4 +1,4 @@
-﻿import { useProjectStore } from '@/store/projectStore';
+import { useProjectStore } from '@/store/projectStore';
 import { TrendingUp, FolderKanban, CheckCircle2, PauseCircle, ListTodo } from 'lucide-react';
 
 /**
@@ -54,8 +54,8 @@ export function StatsCards() {
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
                 {card.title}
               </span>
-              <div className={`p-2 rounded ${card.iconBg}`}>
-                <Icon size={18} />
+              <div className={`p-2 rounded-md shrink-0 ${card.iconBg}`}>
+                <Icon size={16} />
               </div>
             </div>
             <div className="mt-3">

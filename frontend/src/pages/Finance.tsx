@@ -113,32 +113,28 @@ export function Finance() {
             value: fin.totalAllocated > 0 ? formatFCFACompact(fin.totalAllocated) : '0 FCFA',
             sub: `${fin.projectsWithBudget} sur ${projects.length} projet${projects.length > 1 ? 's' : ''} budgétisé${fin.projectsWithBudget > 1 ? 's' : ''}`,
             icon: Wallet,
-            iconColor: 'text-blue-600',
-            iconBg: 'bg-blue-50 border-blue-200',
+            iconBg: 'bg-blue-600 text-white',
           },
           {
             label: 'Total Dépensé',
             value: formatFCFACompact(fin.totalSpent),
             sub: fin.totalAllocated > 0 ? `${fin.consumptionRate.toFixed(1)}% du budget total` : 'Dépenses enregistrées',
             icon: TrendingUp,
-            iconColor: 'text-emerald-600',
-            iconBg: 'bg-emerald-50 border-emerald-200',
+            iconBg: 'bg-emerald-600 text-white',
           },
           {
             label: 'Budget Restant',
             value: fin.totalAllocated > 0 ? formatFCFACompact(fin.totalRemaining) : '—',
             sub: fin.totalRemaining < 0 ? 'Dépassement global' : 'Solde disponible',
             icon: CheckCircle,
-            iconColor: fin.totalRemaining < 0 ? 'text-rose-600' : 'text-indigo-600',
-            iconBg: fin.totalRemaining < 0 ? 'bg-rose-50 border-rose-200' : 'bg-indigo-50 border-indigo-200',
+            iconBg: fin.totalRemaining < 0 ? 'bg-rose-600 text-white' : 'bg-indigo-600 text-white',
           },
           {
             label: 'Projets en Alerte',
             value: String(fin.projectsOverBudget + fin.projectsInWarning),
             sub: `${fin.projectsOverBudget} dépassé${fin.projectsOverBudget > 1 ? 's' : ''}, ${fin.projectsInWarning} sous tension`,
             icon: AlertTriangle,
-            iconColor: (fin.projectsOverBudget + fin.projectsInWarning) > 0 ? 'text-amber-600' : 'text-slate-500',
-            iconBg: (fin.projectsOverBudget + fin.projectsInWarning) > 0 ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200',
+            iconBg: (fin.projectsOverBudget + fin.projectsInWarning) > 0 ? 'bg-amber-600 text-white' : 'bg-slate-700 text-white',
           },
         ].map((kpi) => {
           const Icon = kpi.icon;
@@ -146,7 +142,7 @@ export function Finance() {
             <div key={kpi.label} className="bg-white border border-slate-200 rounded-md p-4 sm:p-5 flex flex-col justify-between shadow-xs">
               <div className="flex items-start justify-between gap-2 mb-3">
                 <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">{kpi.label}</p>
-                <div className={`p-2 rounded-md border shrink-0 ${kpi.iconBg} ${kpi.iconColor}`}>
+                <div className={`p-2 rounded-md shrink-0 ${kpi.iconBg}`}>
                   <Icon size={16} />
                 </div>
               </div>
