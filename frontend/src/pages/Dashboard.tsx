@@ -9,7 +9,6 @@ import {
   Clock,
   FolderKanban,
   ArrowRight,
-  CheckCircle2,
   Layers,
   ChevronRight,
 } from 'lucide-react';
@@ -20,7 +19,7 @@ import { priorityConfig, statusConfig, formatDate, isOverdue, getDaysRemaining }
  */
 export function Dashboard() {
   const navigate = useNavigate();
-  const { projects, teamMembers } = useProjectStore();
+  const { projects } = useProjectStore();
 
   const recentProjects = [...projects]
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
@@ -337,44 +336,6 @@ export function Dashboard() {
                   <div className="h-full bg-amber-500 rounded-sm" style={{ width: `${(onHoldCount / totalProjectsCount) * 100}%` }} />
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Équipe */}
-          <div className="bg-white border border-slate-200 rounded-md p-4 sm:p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-md">
-                  <CheckCircle2 size={18} />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 text-base">Équipe</h3>
-                  <p className="text-xs text-slate-500">{teamMembers.length} membres actifs</p>
-                </div>
-              </div>
-              <button
-                onClick={() => navigate('/team')}
-                className="text-xs font-bold text-blue-600 hover:underline cursor-pointer"
-              >
-                Gérer
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              {teamMembers.slice(0, 4).map((member) => (
-                <div key={member.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <UserAvatar name={member.name} avatar={member.avatar} size="sm" />
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-slate-900 truncate">{member.name}</p>
-                      <p className="text-[11px] text-slate-400 truncate">{member.role}</p>
-                    </div>
-                  </div>
-                  <span className={`text-[11px] font-semibold ${member.role === 'Administrateur' || member.role === 'Admin' ? 'text-amber-600' : 'text-slate-500'}`}>
-                    {member.role === 'Administrateur' || member.role === 'Admin' ? 'Admin' : 'Membre'}
-                  </span>
-                </div>
-              ))}
             </div>
           </div>
         </div>
