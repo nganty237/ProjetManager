@@ -1,17 +1,59 @@
 import { useProjectStore } from '@/store/projectStore';
+import { useAuthStore } from '@/store/authStore';
 import { getPortfolioFinancials } from '@/utils/budgetUtils';
 import { formatFCFACompact } from '@/utils/budgetConstants';
-import { TrendingUp, FolderKanban, CheckCircle2, Wallet, CreditCard } from 'lucide-react';
+import { TrendingUp, FolderKanban, CheckCircle2, Wallet, CreditCard, ListTodo, CheckSquare } from 'lucide-react';
 
 /**
  * Metric KPI card component displaying project overview counters.
  */
 export function StatsCards() {
+  const user = useAuthStore((state) => state.user);
+  const isMember = user?.role === 'MEMBRE';
   const stats = useProjectStore((state) => state.getProjectStats());
   const projects = useProjectStore((state) => state.projects);
   const fin = getPortfolioFinancials(projects);
+
+  const memberTasks = projects.flatMap((p) => 
+    p.tasks.filter((t) => t.assignedTo?.id === user?.id || t.assignedToId === user?.id)
+  );
+  const memberCompletedTasks = memberTasks.filter((t) => t.status === 'done').length;
   
-  const cards = [
+  const cards = isMember ? [
+    {
+      title: 'Mes Projets',
+      value: projects.length,
+      icon: FolderKanban,
+      iconStyle: 'bg-[#2563EB] text-white',
+      subtitle: `${stats.active} en cours`,
+    },
+    {
+      title: 'Projets Actifs',
+      value: stats.active,
+      icon: TrendingUp,
+      iconStyle: 'bg-[#2563EB] text-white',
+    },
+    {
+      title: 'Projets Terminés',
+      value: stats.completed,
+      icon: CheckCircle2,
+      iconStyle: 'bg-[#16A34A] text-white',
+    },
+    {
+      title: 'Mes Tâches Assignées',
+      value: memberTasks.length,
+      icon: ListTodo,
+      iconStyle: 'bg-[#D97706] text-white',
+      subtitle: `${memberTasks.length - memberCompletedTasks} restantes`,
+    },
+    {
+      title: 'Mes Tâches Terminées',
+      value: memberCompletedTasks,
+      icon: CheckSquare,
+      iconStyle: 'bg-[#16A34A] text-white',
+      subtitle: memberTasks.length > 0 ? `${Math.round((memberCompletedTasks / memberTasks.length) * 100)}% de complétion` : 'Aucune tâche',
+    },
+  ] : [
     {
       title: 'Total Projets',
       value: stats.total,

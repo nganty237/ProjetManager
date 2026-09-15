@@ -15,7 +15,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const [formData, setFormData] = useState({
     title: project?.title || '',
     description: project?.description || '',
-    status: project?.status || ('planning' as ProjectStatus),
+    status: project?.status || ('active' as ProjectStatus),
     priority: project?.priority || ('medium' as ProjectPriority),
     startDate: project?.startDate
       ? new Date(project.startDate).toISOString().split('T')[0]
@@ -125,11 +125,9 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
                 className="input"
                 required
               >
-                <option value="planning">Planification</option>
                 <option value="active">En cours</option>
-                <option value="on-hold">En pause</option>
                 <option value="completed">Terminé</option>
-                <option value="cancelled">Annulé</option>
+                <option value="archived">Archivé</option>
               </select>
             </div>
             

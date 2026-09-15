@@ -1,17 +1,24 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
+import { UserRole } from '@/types';
 
-export function ProtectedRoute() {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+interface ProtectedRouteProps {
+  allowedRoles?: UserRole[];
+}
 
-  // Remarque : Si un système de chargement d'état (hydration) est ajouté, 
-  // on pourrait retourner un spinner ici si l'état n'est pas prêt.
-  
+export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
+  const { isAuthenticated, user } = useAuthStore();
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
+  // Vérifier le rôle si des rôles autorisés sont spécifiés
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
+
   return <Outlet />;
-};
+}
 
 export default ProtectedRoute;

@@ -1,5 +1,9 @@
+// Rôles et statuts d'utilisateur
+export type UserRole = 'ADMINISTRATEUR' | 'CHEF_DE_PROJET' | 'MEMBRE';
+export type UserStatus = 'EN_ATTENTE' | 'ACTIF' | 'INACTIF';
+
 // Types pour les projets
-export type ProjectStatus = 'planning' | 'active' | 'on-hold' | 'completed' | 'cancelled';
+export type ProjectStatus = 'active' | 'completed' | 'archived';
 export type ProjectPriority = 'low' | 'medium' | 'high' | 'critical';
 
 export interface TeamMember {
@@ -7,7 +11,10 @@ export interface TeamMember {
   name: string;
   email: string;
   avatar?: string;
-  role: string;
+  role: UserRole | string;
+  status?: UserStatus;
+  createdAt?: string | Date;
+  invitationExpiresAt?: string | Date;
 }
 
 export interface Task {
@@ -60,6 +67,8 @@ export interface Project {
   priority: ProjectPriority;
   startDate: Date;
   endDate?: Date;
+  ownerId?: string;
+  owner?: TeamMember;
   team: TeamMember[];
   tasks: Task[];
   budget?: ProjectBudget;   // Budget financier (optionnel)

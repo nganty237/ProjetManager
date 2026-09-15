@@ -15,7 +15,7 @@ export function TaskForm({ task, teamMembers, onSubmit, onClose }: TaskFormProps
     description: task?.description || '',
     status: task?.status || ('todo' as const),
     priority: task?.priority || ('medium' as ProjectPriority),
-    assignedToId: task?.assignedTo?.id || '',
+    assignedToId: task?.assignedTo?.id || task?.assignedToId || (task as any)?.assignee?.id || '',
     dueDate: task?.dueDate
       ? new Date(task.dueDate).toISOString().split('T')[0]
       : '',
@@ -29,10 +29,11 @@ export function TaskForm({ task, teamMembers, onSubmit, onClose }: TaskFormProps
       : undefined;
     
     const taskData = {
-      title: formData.title,
-      description: formData.description,
+      title: formData.title.trim(),
+      description: formData.description.trim(),
       status: formData.status,
       priority: formData.priority,
+      assignedToId: formData.assignedToId || null,
       assignedTo,
       dueDate: formData.dueDate ? new Date(formData.dueDate) : undefined,
     };
@@ -137,11 +138,21 @@ export function TaskForm({ task, teamMembers, onSubmit, onClose }: TaskFormProps
               className="input"
             >
               <option value="">Non assigné</option>
-              {teamMembers.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.name} - {member.role}
-                </option>
-              ))}
+              {teamMembers.map((member) => {
+                const roleLabel =
+                  member.role === 'CHEF_DE_PROJET'
+                    ? 'Chef de projet'
+                    : member.role === 'MEMBRE'
+                    ? 'Membre'
+                    : member.role === 'ADMINISTRATEUR'
+                    ? 'Administrateur'
+                    : member.role;
+                return (
+                  <option key={member.id} value={member.id}>
+                    {member.name} ({roleLabel})
+                  </option>
+                );
+              })}
             </select>
           </div>
           

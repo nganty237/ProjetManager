@@ -1,11 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+import { UserRole, UserStatus } from '@/types';
+
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: string;
+  role: UserRole;
+  status?: UserStatus;
   avatar?: string;
 }
 

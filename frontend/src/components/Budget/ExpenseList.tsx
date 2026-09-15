@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Expense } from '@/types';
 import { expenseCategoryConfig, formatFCFA } from '@/utils/budgetConstants';
 import { useProjectStore } from '@/store/projectStore';
-import { Trash2, Edit3, ChevronDown, ChevronUp } from 'lucide-react';
+import { Trash2, Edit3, ChevronDown, ChevronUp, Receipt, Plus } from 'lucide-react';
 import { formatDate } from '@/utils/constants';
 
 interface ExpenseListProps {
@@ -16,7 +16,7 @@ interface ExpenseListProps {
 /**
  * Tableau paginé et triable des dépenses d'un projet.
  */
-export function ExpenseList({ projectId, expenses, isAdmin, onEdit }: ExpenseListProps) {
+export function ExpenseList({ projectId, expenses, isAdmin, onAdd, onEdit }: ExpenseListProps) {
   const { deleteExpense } = useProjectStore();
   const [sortField, setSortField] = useState<'date' | 'amount' | 'category'>('date');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -47,7 +47,25 @@ export function ExpenseList({ projectId, expenses, isAdmin, onEdit }: ExpenseLis
   };
 
   if (expenses.length === 0) {
-    return null;
+    return (
+      <div className="py-8 px-4 text-center rounded-md border border-dashed border-slate-200 bg-slate-50/50">
+        <Receipt size={30} className="mx-auto text-slate-300 mb-2" />
+        <p className="text-xs font-bold text-slate-700">Aucune dépense enregistrée</p>
+        <p className="text-[11px] text-slate-400 mt-0.5">
+          Ce projet n'a pas encore de dépenses associées.
+        </p>
+        {isAdmin && onAdd && (
+          <button
+            type="button"
+            onClick={onAdd}
+            className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-white border border-blue-200 hover:border-blue-300 rounded-md transition-colors cursor-pointer shadow-2xs"
+          >
+            <Plus size={13} />
+            Enregistrer une dépense
+          </button>
+        )}
+      </div>
+    );
   }
 
   return (

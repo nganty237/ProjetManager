@@ -24,12 +24,10 @@ export default {
           'en-cours': '#2563EB',
           'en-pause': '#D97706',
           termine: '#16A34A',
-          annule: '#DC2626',
           planning: '#6366F1',
           active: '#2563EB',
           'on-hold': '#D97706',
           completed: '#16A34A',
-          cancelled: '#DC2626',
         },
       },
       animation: {

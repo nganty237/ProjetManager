@@ -14,12 +14,16 @@ import {
 } from 'lucide-react';
 import { priorityConfig, statusConfig, formatDate, isOverdue, getDaysRemaining } from '@/utils/constants';
 
-/**
- * Main executive Dashboard page displaying business KPIs, recent projects, priority tasks, and portfolio status.
- */
+import { useAuthStore } from '@/store/authStore';
+import { Users } from 'lucide-react';
+
 export function Dashboard() {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
   const { projects } = useProjectStore();
+
+  const isAdmin = user?.role === 'ADMINISTRATEUR';
+  const isChef = user?.role === 'CHEF_DE_PROJET';
 
   const recentProjects = [...projects]
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
@@ -27,9 +31,15 @@ export function Dashboard() {
 
   const overdueProjects = projects.filter((p) => isOverdue(p.endDate, p.status));
 
-  const urgentTasks = projects
+  const allUrgentTasks = projects
     .flatMap((p) => p.tasks.map((t) => ({ ...t, projectName: p.title, projectId: p.id })))
-    .filter((t) => t.status !== 'done')
+    .filter((t) => t.status !== 'done');
+
+  // Pour les membres, filtrer les tâches qui leur sont assignées
+  const urgentTasks = (user?.role === 'MEMBRE' 
+    ? allUrgentTasks.filter((t) => t.assignedTo?.id === user.id || t.assignedToId === user.id)
+    : allUrgentTasks
+  )
     .sort((a, b) => {
       const priorityOrder: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
       return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
@@ -37,31 +47,52 @@ export function Dashboard() {
     .slice(0, 5);
 
   const totalProjectsCount = projects.length || 1;
-  const planningCount = projects.filter((p) => p.status === 'planning').length;
   const activeCount = projects.filter((p) => p.status === 'active').length;
-  const onHoldCount = projects.filter((p) => p.status === 'on-hold').length;
   const completedCount = projects.filter((p) => p.status === 'completed').length;
-  const cancelledCount = projects.filter((p) => p.status === 'cancelled').length;
+  const archivedCount = projects.filter((p) => p.status === 'archived').length;
+
+  const getDashboardTitle = () => {
+    if (isAdmin) return 'Tableau de Bord — Supervision';
+    if (isChef) return 'Tableau de Bord — Pilotage';
+    return 'Tableau de Bord — Mes Projets & Tâches';
+  };
+
+  const getDashboardSubtitle = () => {
+    if (isAdmin) return "Supervision globale des projets, finances et utilisateurs de l'organisation";
+    if (isChef) return "Pilotage en temps réel de vos projets, budgets et suivi des équipes";
+    return "Consultez vos tâches assignées, vos projets et vos prochaines échéances";
+  };
 
   return (
     <div className="space-y-6 sm:space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Tableau de Bord
+            {getDashboardTitle()}
           </h1>
           <p className="text-slate-500 text-xs sm:text-sm mt-1">
-            Vue d'ensemble en temps réel de vos projets et de votre équipe
+            {getDashboardSubtitle()}
           </p>
         </div>
-        <button
-          onClick={() => navigate('/projects')}
-          className="btn btn-primary flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold rounded-md"
-        >
-          <FolderKanban size={16} />
-          <span>Voir tous les projets</span>
-          <ArrowRight size={14} />
-        </button>
+        <div className="flex items-center gap-2.5">
+          {isAdmin && (
+            <button
+              onClick={() => navigate('/admin/users')}
+              className="btn btn-secondary flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold rounded-md cursor-pointer"
+            >
+              <Users size={16} />
+              <span>Gérer les utilisateurs</span>
+            </button>
+          )}
+          <button
+            onClick={() => navigate('/projects')}
+            className="btn btn-primary flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold rounded-md cursor-pointer"
+          >
+            <FolderKanban size={16} />
+            <span>{isAdmin ? 'Superviser les projets' : isChef ? 'Mes projets' : 'Voir mes projets'}</span>
+            <ArrowRight size={14} />
+          </button>
+        </div>
       </div>
 
       <StatsCards />
@@ -291,19 +322,6 @@ export function Dashboard() {
               <div>
                 <div className="flex justify-between text-slate-700 mb-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-[#6366F1]" />
-                    Planification
-                  </span>
-                  <span className="font-bold">{planningCount} ({Math.round((planningCount / totalProjectsCount) * 100)}%)</span>
-                </div>
-                <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
-                  <div className="h-full bg-[#6366F1] rounded-sm" style={{ width: `${(planningCount / totalProjectsCount) * 100}%` }} />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-slate-700 mb-1">
-                  <span className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-[#2563EB]" />
                     En cours
                   </span>
@@ -311,19 +329,6 @@ export function Dashboard() {
                 </div>
                 <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
                   <div className="h-full bg-[#2563EB] rounded-sm" style={{ width: `${(activeCount / totalProjectsCount) * 100}%` }} />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-slate-700 mb-1">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-[#D97706]" />
-                    En pause
-                  </span>
-                  <span className="font-bold">{onHoldCount} ({Math.round((onHoldCount / totalProjectsCount) * 100)}%)</span>
-                </div>
-                <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
-                  <div className="h-full bg-[#D97706] rounded-sm" style={{ width: `${(onHoldCount / totalProjectsCount) * 100}%` }} />
                 </div>
               </div>
 
@@ -340,20 +345,18 @@ export function Dashboard() {
                 </div>
               </div>
 
-              {cancelledCount > 0 && (
-                <div>
-                  <div className="flex justify-between text-slate-700 mb-1">
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-[#DC2626]" />
-                      Annulés
-                    </span>
-                    <span className="font-bold">{cancelledCount} ({Math.round((cancelledCount / totalProjectsCount) * 100)}%)</span>
-                  </div>
-                  <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
-                    <div className="h-full bg-[#DC2626] rounded-sm" style={{ width: `${(cancelledCount / totalProjectsCount) * 100}%` }} />
-                  </div>
+              <div>
+                <div className="flex justify-between text-slate-700 mb-1">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#64748B]" />
+                    Archivés
+                  </span>
+                  <span className="font-bold">{archivedCount} ({Math.round((archivedCount / totalProjectsCount) * 100)}%)</span>
                 </div>
-              )}
+                <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
+                  <div className="h-full bg-[#64748B] rounded-sm" style={{ width: `${(archivedCount / totalProjectsCount) * 100}%` }} />
+                </div>
+              </div>
             </div>
           </div>
         </div>

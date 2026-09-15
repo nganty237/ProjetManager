@@ -1,76 +1,50 @@
 import React from 'react';
 import { ProjectStatus, ProjectPriority } from '@/types';
 import { 
-  ClipboardList, 
   Rocket, 
-  PauseCircle, 
   CheckCircle2, 
-  XCircle,
+  Archive,
   ArrowDown,
   ArrowRight,
   ArrowUp,
   Flame
 } from 'lucide-react';
 
-// Constantes des couleurs de statuts
+// Constantes des couleurs de statuts de projets
 export const STATUS_COLORS = {
-  planification: '#6366F1',
-  'en-cours': '#2563EB',
-  'en-pause': '#D97706',
-  termine: '#16A34A',
-  annule: '#DC2626',
-  // Clés techniques
-  planning: '#6366F1',
   active: '#2563EB',
-  'on-hold': '#D97706',
   completed: '#16A34A',
-  cancelled: '#DC2626',
+  archived: '#64748B',
 } as const;
 
-// Configuration des statuts
+// Configuration des 3 statuts de projets
 export const statusConfig: Record<
   ProjectStatus,
   { label: string; color: string; bgColor: string; dotBg: string; hex: string; icon: React.ReactNode }
 > = {
-  planning: {
-    label: 'Planification',
-    color: 'text-[#6366F1]',
-    bgColor: 'bg-[#6366F1]/10',
-    dotBg: 'bg-[#6366F1]',
-    hex: '#6366F1',
-    icon: <ClipboardList size={14} />,
-  },
   active: {
     label: 'En cours',
-    color: 'text-[#2563EB]',
-    bgColor: 'bg-[#2563EB]/10',
-    dotBg: 'bg-[#2563EB]',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50',
+    dotBg: 'bg-blue-600',
     hex: '#2563EB',
     icon: <Rocket size={14} />,
   },
-  'on-hold': {
-    label: 'En pause',
-    color: 'text-[#D97706]',
-    bgColor: 'bg-[#D97706]/10',
-    dotBg: 'bg-[#D97706]',
-    hex: '#D97706',
-    icon: <PauseCircle size={14} />,
-  },
   completed: {
     label: 'Terminé',
-    color: 'text-[#16A34A]',
-    bgColor: 'bg-[#16A34A]/10',
-    dotBg: 'bg-[#16A34A]',
+    color: 'text-emerald-600',
+    bgColor: 'bg-emerald-50',
+    dotBg: 'bg-emerald-600',
     hex: '#16A34A',
     icon: <CheckCircle2 size={14} />,
   },
-  cancelled: {
-    label: 'Annulé',
-    color: 'text-[#DC2626]',
-    bgColor: 'bg-[#DC2626]/10',
-    dotBg: 'bg-[#DC2626]',
-    hex: '#DC2626',
-    icon: <XCircle size={14} />,
+  archived: {
+    label: 'Archivé',
+    color: 'text-slate-500',
+    bgColor: 'bg-slate-100',
+    dotBg: 'bg-slate-400',
+    hex: '#64748B',
+    icon: <Archive size={14} />,
   },
 };
 
@@ -160,7 +134,7 @@ export const getDaysRemaining = (endDate: Date | string): number => {
 
 // Fonction pour vérifier si un projet est en retard
 export const isOverdue = (endDate?: Date | string, status?: ProjectStatus): boolean => {
-  if (!endDate || status === 'completed' || status === 'cancelled') return false;
+  if (!endDate || status === 'completed' || status === 'archived') return false;
   const end = typeof endDate === 'string' ? new Date(endDate) : endDate;
   return new Date() > end;
 };

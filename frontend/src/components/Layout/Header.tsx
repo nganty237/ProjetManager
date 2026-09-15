@@ -121,9 +121,9 @@ export function Header({ onMenuClick }: HeaderProps) {
                     <p className="text-xs font-bold text-slate-900 truncate">{user?.name}</p>
                     <p className="text-[11px] text-slate-500 truncate mt-0.5">{user?.email}</p>
                     <span className={`mt-1.5 inline-block text-[10px] font-bold uppercase tracking-wider ${
-                      user?.role === 'Administrateur' ? 'text-amber-600' : 'text-blue-600'
+                      user?.role === 'ADMINISTRATEUR' ? 'text-amber-600' : user?.role === 'CHEF_DE_PROJET' ? 'text-blue-600' : 'text-slate-600'
                     }`}>
-                      {user?.role ?? 'Membre'}
+                      {user?.role === 'ADMINISTRATEUR' ? 'Administrateur' : user?.role === 'CHEF_DE_PROJET' ? 'Chef de projet' : 'Membre'}
                     </span>
                   </div>
 

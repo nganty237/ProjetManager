@@ -50,16 +50,25 @@ export function BudgetOverview({ expenses, budget, compact = false }: BudgetOver
           Synthèse du Budget
         </h4>
         {allocated > 0 && (
-          <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
+          <span className={`text-xs font-semibold flex items-center gap-1.5 ${
             status === 'exceeded'
-              ? 'bg-rose-50 text-rose-700 border-rose-200'
+              ? 'text-rose-600'
               : status === 'danger'
-              ? 'bg-amber-50 text-amber-700 border-amber-200'
+              ? 'text-amber-600'
               : status === 'warning'
-              ? 'bg-amber-50 text-amber-600 border-amber-200'
-              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+              ? 'text-amber-500'
+              : 'text-emerald-600'
           }`}>
-            {status === 'exceeded' ? 'Budget dépassé' : status === 'danger' ? 'Alerte budget' : status === 'warning' ? 'Attention' : 'Budget sain'}
+            <span className={`w-2 h-2 rounded-full ${
+              status === 'exceeded'
+                ? 'bg-rose-500'
+                : status === 'danger'
+                ? 'bg-amber-500'
+                : status === 'warning'
+                ? 'bg-amber-400'
+                : 'bg-emerald-500'
+            }`} />
+            {status === 'exceeded' ? 'Budget dépassé' : status === 'danger' ? 'Alerte budget' : status === 'warning' ? 'Attention' : 'Budget conforme'}
           </span>
         )}
       </div>

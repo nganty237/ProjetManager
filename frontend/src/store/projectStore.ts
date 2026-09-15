@@ -1,4 +1,4 @@
-﻿import { create } from 'zustand';
+import { create } from 'zustand';
 import { Project, Task, TeamMember, ProjectFilters, ViewMode, Expense } from '@/types';
 import api from '@/utils/api';
 
@@ -39,13 +39,30 @@ interface ProjectStore {
     total: number;
     active: number;
     completed: number;
-    onHold: number;
-    planning: number;
-    cancelled: number;
+    archived: number;
     totalTasks: number;
     completedTasks: number;
   };
 }
+
+// Adapts backend task schema to frontend Task schema
+const adaptTask = (task: any | Task): Task => {
+  const assignedTo = task.assignedTo || task.assignee || undefined;
+  return {
+    ...task,
+    assignedTo: assignedTo ? {
+      id: assignedTo.id,
+      name: assignedTo.name,
+      email: assignedTo.email || '',
+      avatar: assignedTo.avatar,
+      role: assignedTo.role,
+    } : undefined,
+    assignedToId: task.assignedToId || assignedTo?.id || undefined,
+    dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
+    createdAt: task.createdAt ? new Date(task.createdAt) : new Date(),
+    updatedAt: task.updatedAt ? new Date(task.updatedAt) : new Date(),
+  };
+};
 
 // Adapts MySQL naming conventions to frontend Project schema
 const adaptProject = (project: any | Project): Project => {
@@ -55,7 +72,7 @@ const adaptProject = (project: any | Project): Project => {
 
   return {
     ...project,
-    tasks: project.tasks || project.Tasks || [],
+    tasks: (project.tasks || project.Tasks || []).map(adaptTask),
     team: project.team || project.members || [],
     expenses: (project.expenses || []).map((e: any) => ({
       ...e,
@@ -154,7 +171,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   addTask: async (projectId, taskData) => {
     try {
       const response = await api.post(`/tasks/${projectId}`, taskData);
-      const newTask = response.data.task || response.data;
+      const newTask = adaptTask(response.data.task || response.data);
       set((state) => ({
         projects: state.projects.map((project) =>
           project.id === projectId
@@ -175,13 +192,13 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   updateTask: async (projectId, taskId, updates) => {
     try {
       const response = await api.put(`/tasks/${taskId}`, updates);
-      const updatedTask = response.data.task || response.data;
+      const updatedTask = adaptTask(response.data.task || response.data);
       set((state) => ({
         projects: state.projects.map((project) =>
           project.id === projectId
             ? {
                 ...project,
-                tasks: project.tasks.map((t) => (t.id === taskId ? { ...t, ...updates, ...updatedTask } : t)),
+                tasks: project.tasks.map((t) => (t.id === taskId ? { ...t, ...updatedTask } : t)),
               }
             : project
         ),
@@ -377,9 +394,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       total: projects.length,
       active: projects.filter((p) => p.status === 'active').length,
       completed: projects.filter((p) => p.status === 'completed').length,
-      onHold: projects.filter((p) => p.status === 'on-hold').length,
-      planning: projects.filter((p) => p.status === 'planning').length,
-      cancelled: projects.filter((p) => p.status === 'cancelled').length,
+      archived: projects.filter((p) => p.status === 'archived').length,
       totalTasks: projects.reduce((sum, p) => sum + (p.tasks ? p.tasks.length : 0), 0),
       completedTasks: projects.reduce(
         (sum, p) => sum + (p.tasks ? p.tasks.filter((t) => t.status === 'done').length : 0),

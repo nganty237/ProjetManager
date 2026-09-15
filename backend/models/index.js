@@ -11,6 +11,10 @@ Task.belongsTo(Project);
 Project.hasMany(Expense, { onDelete: 'CASCADE', as: 'expenses' });
 Expense.belongsTo(Project);
 
+// Project ownership (Chef de projet)
+User.hasMany(Project, { foreignKey: 'ownerId', as: 'ownedProjects' });
+Project.belongsTo(User, { foreignKey: 'ownerId', as: 'owner' });
+
 Project.belongsToMany(User, { through: 'TeamMembers', as: 'members' });
 User.belongsToMany(Project, { through: 'TeamMembers', as: 'projects' });
 
