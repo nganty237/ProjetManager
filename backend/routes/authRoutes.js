@@ -1,15 +1,21 @@
 import express from 'express';
 import { login, activateAccount, verifyInvitation } from '../controllers/authController.js';
+import { validate } from '../middlewares/validateMiddleware.js';
+import {
+  loginSchema,
+  activateAccountSchema,
+  verifyInvitationParamsSchema,
+} from '../schemas/authSchema.js';
 
 const router = express.Router();
 
 // Se connecter
-router.post('/login', login);
+router.post('/login', validate(loginSchema), login);
 
 // Vérifier le token d'invitation
-router.get('/verify-invitation/:token', verifyInvitation);
+router.get('/verify-invitation/:token', validate({ params: verifyInvitationParamsSchema }), verifyInvitation);
 
 // Activer le compte (définir le mot de passe initial)
-router.post('/activate', activateAccount);
+router.post('/activate', validate(activateAccountSchema), activateAccount);
 
 export default router;

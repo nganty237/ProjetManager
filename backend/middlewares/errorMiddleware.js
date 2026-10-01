@@ -13,6 +13,18 @@ export const errorHandler = (err, req, res, next) => {
   let statusCode = err.statusCode || (res.statusCode === 200 ? 500 : res.statusCode);
   let message = err.message || 'Internal server error';
 
+  let errors = undefined;
+
+  // Format Zod validation errors
+  if (err.name === 'ZodError' || err.issues) {
+    statusCode = 400;
+    message = 'Données de requête invalides';
+    errors = err.issues ? err.issues.map((i) => ({
+      field: i.path.join('.') || 'root',
+      message: i.message,
+    })) : [];
+  }
+
   // Format Sequelize specific errors
   if (err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError') {
     statusCode = 400;
@@ -30,6 +42,7 @@ export const errorHandler = (err, req, res, next) => {
     success: false,
     message,
     statusCode,
+    ...(errors ? { errors } : {}),
     stack: config.app.isProd ? null : err.stack,
   });
 };
