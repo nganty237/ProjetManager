@@ -3,6 +3,9 @@ import Project from '../models/Project.js';
 import Task from '../models/Task.js';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import logger from '../utils/logger.js';
+
+const log = logger.for('UserService');
 
 const validRoles = ['ADMINISTRATEUR', 'CHEF_DE_PROJET', 'MEMBRE'];
 
@@ -82,12 +85,7 @@ export const createUserByAdmin = async (data) => {
   const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
   const invitationLink = `${clientUrl}/activate/${invitationToken}`;
 
-  console.log(`\n========================================`);
-  console.log(`📧 [SIMULATION EMAIL INVITATION]`);
-  console.log(`Destinataire : ${user.email} (${user.name})`);
-  console.log(`Rôle attribué : ${user.role}`);
-  console.log(`Lien d'activation : ${invitationLink}`);
-  console.log(`========================================\n`);
+  log.info(`Account invitation simulated: email=${user.email}, name="${user.name}", role=${user.role}, activationUrl=${invitationLink}`);
 
   return {
     message: "Compte utilisateur créé avec succès en attente d'activation",
@@ -132,11 +130,7 @@ export const resendUserInvitation = async (userId) => {
   const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
   const invitationLink = `${clientUrl}/activate/${invitationToken}`;
 
-  console.log(`\n========================================`);
-  console.log(`📧 [SIMULATION RENVOI INVITATION]`);
-  console.log(`Destinataire : ${user.email} (${user.name})`);
-  console.log(`Nouveau lien d'activation : ${invitationLink}`);
-  console.log(`========================================\n`);
+  log.info(`Account invitation resent: email=${user.email}, name="${user.name}", activationUrl=${invitationLink}`);
 
   return {
     message: `Invitation renvoyée avec succès pour ${user.name}`,

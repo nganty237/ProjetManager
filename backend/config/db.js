@@ -1,69 +1,88 @@
 import { Sequelize } from 'sequelize';
 import mysql from 'mysql2/promise';
-import dotenv from 'dotenv';
+import config from './index.js';
+import logger from '../utils/logger.js';
 
-dotenv.config();
+const log = logger.for('Database');
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASS,
+export const sequelize = new Sequelize(
+  config.db.name,
+  config.db.user,
+  config.db.password,
   {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 3306,
+    host: config.db.host,
+    port: config.db.port,
     dialect: 'mysql',
-    logging: false, // On désactive les logs SQL dans la console
+    logging: config.db.logging ? (msg) => log.debug(msg) : false,
     define: {
-      timestamps: true, // Sequelize ajoutera automatiquement createdAt et updatedAt
+      timestamps: true,
     },
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 60000,
-      idle: 10000,
-    },
+    pool: config.db.pool,
     dialectOptions: {
-      connectTimeout: 60000,
+      connectTimeout: config.db.connectTimeout,
     },
   }
 );
 
 /**
- * Initialise et connecte la base de données MySQL.
- * Crée automatiquement la base de données si elle n'existe pas encore.
+ * Fonction d'attente pour les retentatives de connexion
+ */
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Initialise et connecte la base de données MySQL avec gestion des retentatives.
  */
 export const connectDB = async () => {
-  try {
-    const dbName = process.env.DB_NAME || 'project_manager';
-    
-    // Étape 1 : Connexion au serveur MySQL pour vérifier/créer la base
-    const connection = await mysql.createConnection({
-      host: process.env.DB_HOST || '127.0.0.1',
-      port: process.env.DB_PORT || 3306,
-      user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASS || '',
-    });
-    
-    await connection.query(
-      `CREATE DATABASE IF NOT EXISTS \`${dbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
-    );
-    await connection.end();
+  const { host, port, user, password, name: dbName, retryAttempts, retryDelayMs } = config.db;
+  let attempt = 0;
 
-    // Étape 2 : Authentification Sequelize avec la base de données
-    await sequelize.authenticate();
-    console.log(`MySQL connecté avec succès à la base "${dbName}" !`);
+  while (attempt < retryAttempts) {
+    attempt++;
+    try {
+      log.info(`Connecting to MySQL on ${host}:${port} (attempt ${attempt}/${retryAttempts})...`);
 
-    // Étape 3 : Nettoyer les index dupliqués (bug connu de Sequelize MySQL sur alter: true)
-    await cleanDuplicateIndexes();
-  } catch (error) {
-    console.error('Erreur de connexion MySQL :', error);
-    process.exit(1);
+      // Étape 1 : Connexion au serveur MySQL pour vérifier/créer la base
+      const connection = await mysql.createConnection({
+        host,
+        port,
+        user,
+        password,
+      });
+
+      await connection.query(
+        `CREATE DATABASE IF NOT EXISTS \`${dbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
+      );
+      await connection.end();
+
+      // Étape 2 : Authentification Sequelize avec la base de données
+      await sequelize.authenticate();
+      log.info(`Connected successfully to database "${dbName}" (${host}:${port})`);
+
+      // Étape 3 : Nettoyer les index dupliqués
+      await cleanDuplicateIndexes();
+      return true;
+    } catch (error) {
+      log.warn(`Connection attempt ${attempt}/${retryAttempts} failed: ${error.message}`);
+
+      if (error.code === 'ECONNREFUSED') {
+        log.error(
+          `MySQL service is unreachable at ${host}:${port}. Please verify that the MySQL service is started and listening.`
+        );
+      }
+
+      if (attempt < retryAttempts) {
+        log.info(`Retrying in ${retryDelayMs / 1000} second(s)...`);
+        await wait(retryDelayMs);
+      } else {
+        log.error(`Unable to connect to MySQL database after ${retryAttempts} attempts.`);
+        throw error;
+      }
+    }
   }
 };
 
 /**
  * Nettoie les index uniques dupliqués générés automatiquement par Sequelize (email_2, email_3...)
- * pour éviter l'erreur MySQL 1069: Too many keys specified (max 64 keys).
  */
 export const cleanDuplicateIndexes = async () => {
   try {
@@ -76,11 +95,11 @@ export const cleanDuplicateIndexes = async () => {
 
     for (const key of duplicates) {
       await sequelize.query(`ALTER TABLE Users DROP INDEX \`${key}\``);
+      log.debug(`Duplicate index removed: ${key}`);
     }
-  } catch (error) {
+  } catch {
     // Si la table Users n'existe pas encore lors du premier lancement, on ignore silencieusement
   }
 };
 
 export default sequelize;
-

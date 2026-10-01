@@ -1,31 +1,34 @@
-import dotenv from 'dotenv';
-import { connectDB } from './config/db.js';
-import sequelize from './config/db.js';
+import { connectDB, sequelize } from './config/db.js';
 import { initAdminAccount } from './utils/seedAdmin.js';
+import logger from './utils/logger.js';
 
-dotenv.config();
+const log = logger.for('Seeder');
 
 /**
- * Script de synchronisation de la base de données et d'initialisation du compte administrateur.
+ * Script d'initialisation propre : vérifie la connexion et assure la création du compte administrateur.
+ * Ne contient aucune donnée factice ou de démonstration.
  */
-const syncDatabase = async () => {
+export const seedDatabase = async () => {
   try {
-    console.log('Connexion à la base de données MySQL...');
+    log.info('Connecting to database...');
     await connectDB();
-    await sequelize.sync({ alter: true });
+    await sequelize.sync();
 
-    console.log('\n========================================');
-    console.log('Base de données synchronisée avec succès !');
-    console.log('========================================\n');
-
-    // Initialisation automatique du compte Administrateur
+    // Initialisation du compte Administrateur si inexistant
     await initAdminAccount();
 
-    process.exit(0);
+    log.info('Database initialized successfully.');
   } catch (error) {
-    console.error('Erreur lors de la synchronisation :', error);
-    process.exit(1);
+    log.error(`Database initialization failed: ${error.message}`, error);
+    throw error;
   }
 };
 
-syncDatabase();
+// Exécution directe via script CLI
+if (process.argv[1]?.endsWith('seed.js')) {
+  seedDatabase()
+    .then(() => process.exit(0))
+    .catch(() => process.exit(1));
+}
+
+export default seedDatabase;
