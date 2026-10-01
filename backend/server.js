@@ -19,6 +19,7 @@ import expenseRoutes from './routes/expenseRoutes.js';
 
 // Import des middlewares et initialisations
 import { notFound, errorHandler } from './middlewares/errorMiddleware.js';
+import { globalApiLimiter } from './middlewares/rateLimitMiddleware.js';
 import { initAdminAccount } from './utils/seedAdmin.js';
 
 const app = express();
@@ -79,6 +80,9 @@ app.get('/api/health', async (req, res) => {
     },
   });
 });
+
+// Limitation du débit (Rate Limiting) sur toute l'API
+app.use('/api', globalApiLimiter);
 
 // Enregistrement des routes API
 app.use('/api/auth', authRoutes);

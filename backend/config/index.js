@@ -82,6 +82,22 @@ export const config = {
     fileLogging: process.env.FILE_LOGGING !== 'false',
     maxLogSize: parseInt(process.env.MAX_LOG_SIZE, 10) || 5 * 1024 * 1024,
   },
+
+  rateLimit: {
+    enabled: process.env.RATE_LIMIT_ENABLED !== 'false',
+    global: {
+      windowMs: parseInt(process.env.RATE_LIMIT_GLOBAL_WINDOW_MS, 10) || 15 * 60 * 1000, // 15 minutes
+      max: parseInt(process.env.RATE_LIMIT_GLOBAL_MAX, 10) || (isDev ? 1000 : 300),
+    },
+    auth: {
+      windowMs: parseInt(process.env.RATE_LIMIT_AUTH_WINDOW_MS, 10) || 15 * 60 * 1000, // 15 minutes
+      max: parseInt(process.env.RATE_LIMIT_AUTH_MAX, 10) || (isDev ? 50 : 10), // 10 tentatives / 15 min
+    },
+    sensitive: {
+      windowMs: parseInt(process.env.RATE_LIMIT_SENSITIVE_WINDOW_MS, 10) || 15 * 60 * 1000,
+      max: parseInt(process.env.RATE_LIMIT_SENSITIVE_MAX, 10) || (isDev ? 100 : 20),
+    },
+  },
 };
 
 /**

@@ -14,6 +14,7 @@ import {
 import { protect, isAdmin } from '../middlewares/authMiddleware.js';
 import upload from '../middlewares/uploadMiddleware.js';
 import { validate } from '../middlewares/validateMiddleware.js';
+import { passwordLimiter, inviteLimiter } from '../middlewares/rateLimitMiddleware.js';
 import {
   createUserSchema,
   updateUserByAdminSchema,
@@ -28,16 +29,16 @@ const router = express.Router();
 // Profil de l'utilisateur connecté
 router.get('/me', protect, getMe);
 router.put('/me', protect, upload.single('avatarFile'), validate(updateMeSchema), updateMe);
-router.put('/me/password', protect, validate(updatePasswordSchema), updatePassword);
+router.put('/me/password', protect, passwordLimiter, validate(updatePasswordSchema), updatePassword);
 
 // Liste de tous les utilisateurs (accessible à tous les utilisateurs authentifiés pour sélection d'équipe)
 router.get('/', protect, getUsers);
 
 // Création d'un utilisateur par l'administrateur (génère l'invitation)
-router.post('/', protect, isAdmin, validate(createUserSchema), createUser);
+router.post('/', protect, isAdmin, inviteLimiter, validate(createUserSchema), createUser);
 
-// Renvoyer l'invitation
-router.post('/:id/resend-invite', protect, isAdmin, validate({ params: userIdParamsSchema }), resendInvitation);
+// Renvoyer l'invitation (limiteur anti-spam d'invitation)
+router.post('/:id/resend-invite', protect, isAdmin, inviteLimiter, validate({ params: userIdParamsSchema }), resendInvitation);
 
 // Activer / Désactiver un utilisateur
 router.put('/:id/toggle-status', protect, isAdmin, validate({ params: userIdParamsSchema }), toggleUserStatus);
