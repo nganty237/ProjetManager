@@ -20,9 +20,10 @@ export function TaskCard({ task, onEdit, onDelete, onStatusChange }: TaskCardPro
   const priority = priorityConfig[task.priority];
   const overdue = isOverdue(task.dueDate);
 
-  const canChangeStatus = user?.role === 'Administrateur' ||
-    (user?.id && (task.assignedTo?.id === user.id || task.assignedToId === user.id));
-  const canEditOrDelete = user?.role === 'Administrateur';
+  const isChef = user?.role === 'CHEF_DE_PROJET';
+  const isAssignee = Boolean(user?.id && (task.assignedTo?.id === user.id || task.assignedToId === user.id));
+  const canChangeStatus = isChef || isAssignee;
+  const canEditOrDelete = isChef;
 
   return (
     <div className="bg-white rounded-md border border-slate-200 p-4 sm:p-5 flex flex-col justify-between hover:border-slate-300 transition-colors">

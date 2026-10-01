@@ -11,8 +11,9 @@ import {
   Users,
   Wallet,
   FileDown,
+  Receipt,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   priorityConfig,
   formatDate,
@@ -26,28 +27,49 @@ import { ProjectForm } from '@/components/Projects/ProjectForm';
 import { UserAvatar } from '@/components/Common/UserAvatar';
 import { StatusDropdown } from '@/components/Common/StatusDropdown';
 import { BudgetOverview } from '@/components/Budget/BudgetOverview';
-import { BudgetChart } from '@/components/Budget/BudgetChart';
 import { ExpenseList } from '@/components/Budget/ExpenseList';
-import { ExpenseForm } from '@/components/Budget/ExpenseForm';
-import { Expense } from '@/types';
 
 export function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const isAdmin = user?.role === 'Administrateur';
-  const { getProjectById, updateProject, deleteProject, addTask, updateTask, deleteTask } =
+  const { getProjectById, updateProject, deleteProject, addTask, updateTask, deleteTask, teamMembers } =
     useProjectStore();
+  
+  const project = id ? getProjectById(id) : null;
+  const isOwner = user?.role === 'CHEF_DE_PROJET' && (project?.ownerId === user?.id || !project?.ownerId);
+  const isMember = user?.role === 'MEMBRE';
   
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [editingTask, setEditingTask] = useState<any>(null);
-  const [showExpenseForm, setShowExpenseForm] = useState(false);
-  const [editingExpense, setEditingExpense] = useState<Expense | undefined>(undefined);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
-  const { addExpense, updateExpense } = useProjectStore();
-  
-  const project = id ? getProjectById(id) : null;
+  const [selectedTaskStatus, setSelectedTaskStatus] = useState<'all' | 'todo' | 'in-progress' | 'review' | 'done'>('all');
+  const [showExpenses, setShowExpenses] = useState(false);
+
+  // Membres éligibles pour l'assignation de tâches (Chef de projet propriétaire + équipe du projet + membres)
+  const assignableMembers = useMemo(() => {
+    if (!project) return [];
+    const list: any[] = [];
+    if (project.owner) {
+      list.push(project.owner);
+    }
+    if (project.team && Array.isArray(project.team)) {
+      project.team.forEach((m) => {
+        if (!list.some((existing) => existing.id === m.id)) {
+          list.push(m);
+        }
+      });
+    }
+    if (teamMembers && Array.isArray(teamMembers)) {
+      teamMembers.forEach((m) => {
+        if (!list.some((existing) => existing.id === m.id)) {
+          list.push(m);
+        }
+      });
+    }
+    return list;
+  }, [project, teamMembers]);
 
   const handleExportPdf = () => {
     if (!project) return;
@@ -78,7 +100,7 @@ export function ProjectDetail() {
   const overdue = isOverdue(project.endDate, project.status);
   
   const handleDeleteProject = () => {
-    if (!isAdmin) return;
+    if (!isOwner) return;
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) {
       deleteProject(project.id);
       navigate('/projects');
@@ -86,13 +108,13 @@ export function ProjectDetail() {
   };
   
   const handleEditTask = (task: any) => {
-    if (!isAdmin) return;
+    if (!isOwner) return;
     setEditingTask(task);
     setShowTaskForm(true);
   };
   
   const handleUpdateTask = (taskData: any) => {
-    if (!isAdmin) return;
+    if (!isOwner) return;
     if (editingTask) {
       updateTask(project.id, editingTask.id, taskData);
       setEditingTask(null);
@@ -102,20 +124,20 @@ export function ProjectDetail() {
   };
   
   const handleDeleteTask = (taskId: string) => {
-    if (!isAdmin) return;
+    if (!isOwner) return;
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) {
       deleteTask(project.id, taskId);
     }
   };
   
   const handleProjectStatusChange = (newStatus: any) => {
-    if (!isAdmin) return;
+    if (!isOwner) return;
     updateProject(project.id, { status: newStatus });
   };
 
   const handleTaskStatusChange = (taskId: string, newStatus: any) => {
     const task = project.tasks.find((t) => t.id === taskId);
-    const canChangeStatus = isAdmin || (user?.id && (task?.assignedTo?.id === user.id || task?.assignedToId === user.id));
+    const canChangeStatus = isOwner || (user?.id && (task?.assignedTo?.id === user.id || task?.assignedToId === user.id));
     if (!canChangeStatus) return;
     updateTask(project.id, taskId, { status: newStatus });
   };
@@ -128,49 +150,62 @@ export function ProjectDetail() {
     review: project.tasks.filter((t) => t.status === 'review').length,
     done: project.tasks.filter((t) => t.status === 'done').length,
   };
+
+  // Tâches filtrées par le statut sélectionné
+  const filteredTasks = selectedTaskStatus === 'all'
+    ? project.tasks
+    : project.tasks.filter((t) => t.status === selectedTaskStatus);
   
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <div className="flex items-start gap-3 sm:gap-4">
+        <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
           <button
             onClick={() => navigate('/projects')}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors mt-1 flex-shrink-0"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors mt-0.5 shrink-0"
+            title="Retour aux projets"
           >
             <ArrowLeft size={20} />
           </button>
-          <div className="min-w-0">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 truncate">{project.title}</h1>
-            <p className="text-gray-600 text-sm sm:text-base">{project.description}</p>
+          <div className="flex-1 min-w-0">
+            <h1
+              className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-1 truncate"
+              title={project.title}
+            >
+              {project.title}
+            </h1>
+            {project.description && (
+              <p className="text-slate-500 text-sm sm:text-base line-clamp-2">{project.description}</p>
+            )}
           </div>
         </div>
         
-        <div className="flex flex-wrap gap-2 sm:self-start">
+        <div className="flex items-center gap-2 shrink-0 sm:self-start">
           <button
             onClick={handleExportPdf}
             disabled={isExportingPdf}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium flex-1 sm:flex-none flex items-center justify-center gap-2 text-sm px-3.5 py-2 rounded-lg transition-colors cursor-pointer disabled:opacity-50 shadow-sm"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium flex items-center justify-center gap-2 text-sm px-3.5 py-2 rounded-lg transition-colors cursor-pointer disabled:opacity-50 shadow-sm shrink-0"
             title="Exporter le rapport exécutif du projet en PDF"
           >
             <FileDown size={17} className="text-white" />
             <span>{isExportingPdf ? 'Export...' : 'Rapport PDF'}</span>
           </button>
 
-          {isAdmin && (
+          {isOwner && (
             <>
               <button
                 onClick={() => setShowProjectForm(true)}
-                className="btn btn-secondary flex-1 sm:flex-none flex items-center justify-center gap-2 text-sm"
+                className="btn btn-secondary flex items-center justify-center gap-2 text-sm shrink-0 cursor-pointer"
               >
-                <Edit size={18} />
+                <Edit size={16} />
                 Modifier
               </button>
               <button
                 onClick={handleDeleteProject}
-                className="btn btn-danger flex-1 sm:flex-none flex items-center justify-center gap-2 text-sm"
+                className="btn btn-danger flex items-center justify-center gap-2 text-sm shrink-0 cursor-pointer"
               >
-                <Trash2 size={18} />
+                <Trash2 size={16} />
                 Supprimer
               </button>
             </>
@@ -184,7 +219,7 @@ export function ProjectDetail() {
           value={project.status}
           type="project"
           onChange={handleProjectStatusChange}
-          disabled={!isAdmin}
+          disabled={!isOwner}
         />
         <span className="text-slate-300">•</span>
         <span className={`inline-flex items-center gap-1.5 ${priority.color}`}>
@@ -206,7 +241,9 @@ export function ProjectDetail() {
         {/* Dates */}
         <div className="card">
           <div className="flex items-center gap-3 mb-3">
-            <Calendar className="text-primary-600 flex-shrink-0" size={20} />
+            <div className="p-2 bg-[#2563EB] text-white rounded-md shrink-0">
+              <Calendar size={18} />
+            </div>
             <h3 className="font-semibold text-gray-900">Dates</h3>
           </div>
           <div className="space-y-2 text-sm">
@@ -238,7 +275,9 @@ export function ProjectDetail() {
         {/* Équipe */}
         <div className="card">
           <div className="flex items-center gap-3 mb-3">
-            <Users className="text-purple-600 flex-shrink-0" size={20} />
+            <div className="p-2 bg-[#6366F1] text-white rounded-md shrink-0">
+              <Users size={18} />
+            </div>
             <h3 className="font-semibold text-gray-900">Équipe</h3>
           </div>
           <div className="space-y-2.5 max-h-36 overflow-y-auto pr-1">
@@ -257,105 +296,161 @@ export function ProjectDetail() {
         </div>
       </div>
       
-      {/* Statistiques des tâches */}
+      {/* Statistiques et filtres des tâches */}
       <div className="card overflow-x-auto">
-        <h3 className="font-semibold text-slate-900 mb-4 whitespace-nowrap">Statistiques des tâches</h3>
-        <div className="flex sm:grid sm:grid-cols-5 gap-4 min-w-[500px] sm:min-w-0">
-          <div className="flex-1 text-center p-2 bg-slate-50 rounded-md border border-slate-200">
-            <div className="text-xl sm:text-2xl font-bold text-slate-900">{taskStats.total}</div>
-            <div className="text-xs sm:text-sm text-slate-600">Total</div>
-          </div>
-          <div className="flex-1 text-center p-2 bg-slate-50 rounded-md border border-slate-200">
-            <div className="text-xl sm:text-2xl font-bold text-slate-500">{taskStats.todo}</div>
-            <div className="text-xs sm:text-sm text-slate-600">À faire</div>
-          </div>
-          <div className="flex-1 text-center p-2 bg-blue-50 rounded-md border border-blue-200">
-            <div className="text-xl sm:text-2xl font-bold text-blue-600">{taskStats.inProgress}</div>
-            <div className="text-xs sm:text-sm text-slate-600">En cours</div>
-          </div>
-          <div className="flex-1 text-center p-2 bg-amber-50 rounded-md border border-amber-200">
-            <div className="text-xl sm:text-2xl font-bold text-amber-600">{taskStats.review}</div>
-            <div className="text-xs sm:text-sm text-slate-600">En révision</div>
-          </div>
-          <div className="flex-1 text-center p-2 bg-emerald-50 rounded-md border border-emerald-200">
-            <div className="text-xl sm:text-2xl font-bold text-emerald-600">{taskStats.done}</div>
-            <div className="text-xs sm:text-sm text-slate-600">Terminées</div>
-          </div>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-bold text-slate-900 text-xs uppercase tracking-wider whitespace-nowrap">
+            Filtres par statut
+          </h3>
+          {selectedTaskStatus !== 'all' && (
+            <button
+              type="button"
+              onClick={() => setSelectedTaskStatus('all')}
+              className="text-xs text-blue-600 hover:text-blue-700 font-semibold cursor-pointer"
+            >
+              Afficher tout ({taskStats.total})
+            </button>
+          )}
+        </div>
+        <div className="flex sm:grid sm:grid-cols-5 gap-3 min-w-[500px] sm:min-w-0">
+          <button
+            type="button"
+            onClick={() => setSelectedTaskStatus('all')}
+            className={`flex-1 text-center p-3 rounded-md border transition-all cursor-pointer ${
+              selectedTaskStatus === 'all'
+                ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
+            }`}
+            title="Afficher toutes les tâches"
+          >
+            <div className="text-xl sm:text-2xl font-bold">{taskStats.total}</div>
+            <div className={`text-xs ${selectedTaskStatus === 'all' ? 'text-slate-300' : 'text-slate-500'}`}>Toutes</div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedTaskStatus('todo')}
+            className={`flex-1 text-center p-3 rounded-md border transition-all cursor-pointer ${
+              selectedTaskStatus === 'todo'
+                ? 'bg-slate-800 text-white border-slate-800 shadow-sm'
+                : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
+            }`}
+            title="Filtrer les tâches À faire"
+          >
+            <div className={`text-xl sm:text-2xl font-bold ${selectedTaskStatus === 'todo' ? 'text-white' : 'text-slate-600'}`}>{taskStats.todo}</div>
+            <div className={`text-xs ${selectedTaskStatus === 'todo' ? 'text-slate-300' : 'text-slate-500'}`}>À faire</div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedTaskStatus('in-progress')}
+            className={`flex-1 text-center p-3 rounded-md border transition-all cursor-pointer ${
+              selectedTaskStatus === 'in-progress'
+                ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                : 'bg-white hover:bg-blue-50/40 border-slate-200 text-slate-700'
+            }`}
+            title="Filtrer les tâches En cours"
+          >
+            <div className={`text-xl sm:text-2xl font-bold ${selectedTaskStatus === 'in-progress' ? 'text-white' : 'text-blue-600'}`}>{taskStats.inProgress}</div>
+            <div className={`text-xs ${selectedTaskStatus === 'in-progress' ? 'text-blue-100' : 'text-slate-500'}`}>En cours</div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedTaskStatus('review')}
+            className={`flex-1 text-center p-3 rounded-md border transition-all cursor-pointer ${
+              selectedTaskStatus === 'review'
+                ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
+                : 'bg-white hover:bg-amber-50/40 border-slate-200 text-slate-700'
+            }`}
+            title="Filtrer les tâches En révision"
+          >
+            <div className={`text-xl sm:text-2xl font-bold ${selectedTaskStatus === 'review' ? 'text-white' : 'text-amber-600'}`}>{taskStats.review}</div>
+            <div className={`text-xs ${selectedTaskStatus === 'review' ? 'text-amber-100' : 'text-slate-500'}`}>En révision</div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedTaskStatus('done')}
+            className={`flex-1 text-center p-3 rounded-md border transition-all cursor-pointer ${
+              selectedTaskStatus === 'done'
+                ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                : 'bg-white hover:bg-emerald-50/40 border-slate-200 text-slate-700'
+            }`}
+            title="Filtrer les tâches Terminées"
+          >
+            <div className={`text-xl sm:text-2xl font-bold ${selectedTaskStatus === 'done' ? 'text-white' : 'text-emerald-600'}`}>{taskStats.done}</div>
+            <div className={`text-xs ${selectedTaskStatus === 'done' ? 'text-emerald-100' : 'text-slate-500'}`}>Terminées</div>
+          </button>
         </div>
       </div>
 
-      {/* Section Budget & Dépenses */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Wallet size={22} className="text-emerald-600" />
-            Budget & Dépenses
-          </h2>
-          {isAdmin && (
-            <div className="flex gap-2">
-              <button
-                onClick={() => { setEditingExpense(undefined); setShowExpenseForm(true); }}
-                className="btn btn-primary flex items-center gap-2 text-sm rounded-md"
-              >
-                <PlusCircle size={16} /> Ajouter une dépense
-              </button>
+      {/* Section Budget (réservée Chef de projet et Admin) */}
+      {!isMember && (
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2.5">
+              <div className="p-2 bg-[#16A34A] text-white rounded-md shrink-0">
+                <Wallet size={18} />
+              </div>
+              Budget & Finances
+            </h2>
+            <div className="flex items-center gap-3">
+              {(project.expenses?.length || 0) > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowExpenses(!showExpenses)}
+                  className="text-xs text-slate-700 hover:text-slate-900 font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer px-3 py-1.5 rounded-md border border-slate-200 bg-white hover:bg-slate-50 shadow-2xs"
+                >
+                  <Receipt size={14} className="text-slate-500" />
+                  {showExpenses ? 'Masquer les dépenses' : `Voir les dépenses (${project.expenses?.length || 0})`}
+                </button>
+              )}
+              {isOwner && (
+                <button
+                  onClick={() => navigate(`/finance?projectId=${project.id}`)}
+                  className="text-xs text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-1 transition-colors cursor-pointer"
+                >
+                  Gérer dans Finances &rarr;
+                </button>
+              )}
+            </div>
+          </div>
+
+          <BudgetOverview expenses={project.expenses || []} budget={project.budget} />
+
+          {showExpenses && (
+            <div className="bg-white border border-slate-200 rounded-md p-4 sm:p-5 shadow-xs mt-3">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-bold text-slate-900 text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2">
+                  <Receipt size={16} className="text-slate-500" />
+                  Journal des Dépenses ({project.expenses?.length || 0})
+                </h4>
+              </div>
+              <ExpenseList
+                projectId={project.id}
+                expenses={project.expenses || []}
+                isAdmin={isOwner}
+                onEdit={() => navigate(`/finance?projectId=${project.id}`)}
+              />
             </div>
           )}
         </div>
-
-        <BudgetOverview expenses={project.expenses || []} budget={project.budget} />
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="bg-white border border-slate-200 rounded-md p-4">
-            <h4 className="font-bold text-slate-900 text-sm mb-4">Répartition par catégorie</h4>
-            <BudgetChart expenses={project.expenses || []} budget={project.budget} />
-          </div>
-          <div className="bg-white border border-slate-200 rounded-md p-4">
-            <h4 className="font-bold text-slate-900 text-sm mb-1">Dépenses récentes</h4>
-            <p className="text-xs text-slate-400 mb-3">3 dernières dépenses enregistrées</p>
-            {(project.expenses || []).length === 0 ? (
-              <p className="text-xs text-slate-400 text-center py-8">Aucune dépense</p>
-            ) : (
-              <div className="space-y-2">
-                {[...(project.expenses || [])]
-                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                  .slice(0, 3)
-                  .map((exp) => (
-                    <div key={exp.id} className="flex items-center justify-between text-xs py-2 border-b border-slate-100 last:border-0">
-                      <span className="font-semibold text-slate-800 truncate mr-2">{exp.label}</span>
-                      <span className="font-bold text-slate-700 whitespace-nowrap">
-                        {new Intl.NumberFormat('fr-FR').format(exp.amount)} FCFA
-                      </span>
-                    </div>
-                  ))
-                }
-              </div>
-            )}
-          </div>
-        </div>
-
-        <ExpenseList
-          projectId={project.id}
-          expenses={project.expenses || []}
-          isAdmin={isAdmin}
-          onAdd={() => { setEditingExpense(undefined); setShowExpenseForm(true); }}
-          onEdit={(exp) => { setEditingExpense(exp); setShowExpenseForm(true); }}
-        />
-      </div>
+      )}
 
       {/* Tâches */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
-            Tâches ({project.tasks.length})
+            Tâches ({filteredTasks.length}{selectedTaskStatus !== 'all' ? ` sur ${project.tasks.length}` : ''})
           </h2>
-          {isAdmin && (
+          {isOwner && (
             <button
               onClick={() => {
                 setEditingTask(null);
                 setShowTaskForm(true);
               }}
-              className="btn btn-primary flex items-center justify-center gap-2 w-full sm:w-auto text-sm rounded-md"
+              className="btn btn-primary flex items-center justify-center gap-2 w-full sm:w-auto text-sm rounded-md cursor-pointer"
             >
               <PlusCircle size={20} />
               Nouvelle Tâche
@@ -363,9 +458,9 @@ export function ProjectDetail() {
           )}
         </div>
         
-        {project.tasks.length > 0 ? (
+        {filteredTasks.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {project.tasks.map((task) => (
+            {filteredTasks.map((task) => (
               <TaskCard
                 key={task.id}
                 task={task}
@@ -377,7 +472,20 @@ export function ProjectDetail() {
           </div>
         ) : (
           <div className="card text-center text-slate-400 py-12">
-            Aucune tâche pour ce projet
+            {selectedTaskStatus !== 'all' ? (
+              <div className="space-y-2">
+                <p className="text-sm text-slate-600">Aucune tâche avec ce statut</p>
+                <button
+                  type="button"
+                  onClick={() => setSelectedTaskStatus('all')}
+                  className="text-xs text-blue-600 font-semibold hover:underline cursor-pointer"
+                >
+                  Afficher toutes les tâches ({taskStats.total})
+                </button>
+              </div>
+            ) : (
+              'Aucune tâche pour ce projet'
+            )}
           </div>
         )}
       </div>
@@ -386,7 +494,7 @@ export function ProjectDetail() {
       {showTaskForm && (
         <TaskForm
           task={editingTask}
-          teamMembers={project.team}
+          teamMembers={assignableMembers}
           onSubmit={handleUpdateTask}
           onClose={() => {
             setShowTaskForm(false);
@@ -395,21 +503,6 @@ export function ProjectDetail() {
         />
       )}
 
-      {showExpenseForm && (
-        <ExpenseForm
-          projectId={project.id}
-          expense={editingExpense}
-          onSubmit={(data) => {
-            if (editingExpense) {
-              updateExpense(project.id, editingExpense.id, data);
-            } else {
-              addExpense(project.id, data);
-            }
-          }}
-          onClose={() => { setShowExpenseForm(false); setEditingExpense(undefined); }}
-        />
-      )}
-      
       {showProjectForm && (
         <ProjectForm project={project} onClose={() => setShowProjectForm(false)} />
       )}

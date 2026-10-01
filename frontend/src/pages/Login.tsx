@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
-import { Mail, Lock, LogIn, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, LogIn, AlertCircle, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import api from '@/utils/api';
 
 export function Login() {
@@ -40,11 +40,22 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-      <div className="max-w-md w-full p-8 bg-white border border-slate-200 space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-8">
+      <div className="max-w-md w-full p-8 bg-white border border-slate-200 space-y-6 shadow-sm rounded-lg">
+        {/* Lien retour accueil */}
+        <div>
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-blue-600 transition-colors"
+          >
+            <ArrowLeft size={14} />
+            Retour à l'accueil
+          </Link>
+        </div>
+
         {/* Logo / Titre */}
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-600 text-white mb-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-600 text-white mb-3 rounded-lg shadow-sm shadow-blue-500/30">
             <LogIn size={26} />
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900">Connexion</h1>
@@ -54,7 +65,7 @@ export function Login() {
         </div>
 
         {error && (
-          <div className="bg-rose-50 text-rose-700 p-3.5 flex items-center gap-3 text-xs font-semibold border border-rose-200">
+          <div className="bg-rose-50 text-rose-700 p-3.5 flex items-center gap-3 text-xs font-semibold border border-rose-200 rounded-md">
             <AlertCircle size={16} className="shrink-0" />
             {error}
           </div>
@@ -123,12 +134,12 @@ export function Login() {
           </button>
         </form>
 
-        <p className="text-center text-xs text-slate-600">
-          Vous n'avez pas de compte ?{' '}
-          <Link to="/signup" className="text-blue-600 font-bold hover:underline">
-            Créer un compte
-          </Link>
-        </p>
+        <div className="pt-3 border-t border-slate-100 text-center text-xs text-slate-500 space-y-1">
+          <p className="font-medium text-slate-600">Accès sur invitation uniquement</p>
+          <p className="text-[11px] text-slate-400">
+            Les comptes sont créés par l'administrateur. Si vous avez reçu une invitation, utilisez le lien fourni pour activer votre compte.
+          </p>
+        </div>
       </div>
     </div>
   );

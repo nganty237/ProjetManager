@@ -15,7 +15,7 @@ import { Plus } from 'lucide-react';
 export function Projects() {
   const { viewMode, setViewMode, getFilteredProjects } = useProjectStore();
   const { user } = useAuthStore();
-  const isAdmin = user?.role === 'Administrateur';
+  const isChef = user?.role === 'CHEF_DE_PROJET';
   const [showForm, setShowForm] = useState(false);
   const projects = getFilteredProjects();
 
@@ -25,21 +25,23 @@ export function Projects() {
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Gestion des Projets
+              {user?.role === 'ADMINISTRATEUR' ? 'Supervision des Projets' : user?.role === 'CHEF_DE_PROJET' ? 'Mes Projets' : 'Mes Projets Assignés'}
             </h1>
             <span className="text-xs font-semibold text-slate-500">
-              ({projects.length} projets)
+              ({projects.length} projet{projects.length > 1 ? 's' : ''})
             </span>
           </div>
           <p className="text-slate-500 text-xs sm:text-sm mt-1">
-            Gérez, suivez et collaborez sur tous vos projets en cours
+            {user?.role === 'ADMINISTRATEUR' 
+              ? 'Consultez en lecture seule l\'ensemble des projets et des portefeuilles' 
+              : 'Gérez, suivez et collaborez sur vos projets'}
           </p>
         </div>
 
-        {isAdmin && (
+        {isChef && (
           <button
             onClick={() => setShowForm(true)}
-            className="btn btn-primary flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold rounded-md"
+            className="btn btn-primary flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold rounded-md cursor-pointer"
           >
             <Plus size={18} />
             <span>Nouveau Projet</span>

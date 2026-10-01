@@ -50,16 +50,25 @@ export function BudgetOverview({ expenses, budget, compact = false }: BudgetOver
           Synthèse du Budget
         </h4>
         {allocated > 0 && (
-          <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
+          <span className={`text-xs font-semibold flex items-center gap-1.5 ${
             status === 'exceeded'
-              ? 'bg-rose-50 text-rose-700 border-rose-200'
+              ? 'text-rose-600'
               : status === 'danger'
-              ? 'bg-amber-50 text-amber-700 border-amber-200'
+              ? 'text-amber-600'
               : status === 'warning'
-              ? 'bg-amber-50 text-amber-600 border-amber-200'
-              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+              ? 'text-amber-500'
+              : 'text-emerald-600'
           }`}>
-            {status === 'exceeded' ? 'Budget dépassé' : status === 'danger' ? 'Alerte budget' : status === 'warning' ? 'Attention' : 'Budget sain'}
+            <span className={`w-2 h-2 rounded-full ${
+              status === 'exceeded'
+                ? 'bg-rose-500'
+                : status === 'danger'
+                ? 'bg-amber-500'
+                : status === 'warning'
+                ? 'bg-amber-400'
+                : 'bg-emerald-500'
+            }`} />
+            {status === 'exceeded' ? 'Budget dépassé' : status === 'danger' ? 'Alerte budget' : status === 'warning' ? 'Attention' : 'Budget conforme'}
           </span>
         )}
       </div>
@@ -86,26 +95,8 @@ export function BudgetOverview({ expenses, budget, compact = false }: BudgetOver
         </div>
       </div>
 
-      {/* Barre de progression */}
-      {allocated > 0 ? (
-        <div className="pt-2">
-          <div className="flex justify-between items-center text-xs text-slate-600 mb-1.5 font-medium">
-            <span>Taux de consommation</span>
-            <span className="font-extrabold text-slate-900">{rate.toFixed(1)}%</span>
-          </div>
-          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-700 ${barColor}`}
-              style={{ width: `${Math.min(rate, 100)}%` }}
-            />
-          </div>
-          <div className="flex justify-between text-[11px] text-slate-400 mt-1.5 font-medium">
-            <span>0 FCFA</span>
-            <span>{formatFCFA(allocated)}</span>
-          </div>
-        </div>
-      ) : (
-        <div className="text-center py-3 bg-slate-50 border border-dashed border-slate-200 rounded-md text-xs text-slate-400 font-medium">
+      {allocated === 0 && (
+        <div className="text-center py-2.5 bg-slate-50 border border-dashed border-slate-200 rounded-md text-xs text-slate-400 font-medium">
           Aucun budget alloué. Les dépenses sont actuellement enregistrées hors budget.
         </div>
       )}

@@ -1,4 +1,4 @@
-﻿import express from 'express';
+import express from 'express';
 import { 
   getProjects, 
   getProjectById, 
@@ -7,20 +7,20 @@ import {
   updateProjectBudget,
   deleteProject 
 } from '../controllers/projectController.js';
-import { protect, isAdmin } from '../middlewares/authMiddleware.js';
+import { protect, isChefDeProjet, isProjectOwner } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
 router.route('/')
   .get(protect, getProjects)
-  .post(protect, isAdmin, createProject);
+  .post(protect, isChefDeProjet, createProject);
 
 router.route('/:id/budget')
-  .put(protect, isAdmin, updateProjectBudget);
+  .put(protect, isChefDeProjet, isProjectOwner, updateProjectBudget);
 
 router.route('/:id')
   .get(protect, getProjectById)
-  .put(protect, isAdmin, updateProject)
-  .delete(protect, isAdmin, deleteProject);
+  .put(protect, isChefDeProjet, isProjectOwner, updateProject)
+  .delete(protect, isChefDeProjet, isProjectOwner, deleteProject);
 
 export default router;

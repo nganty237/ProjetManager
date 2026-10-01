@@ -1,6 +1,6 @@
 import { useProjectStore } from '@/store/projectStore';
 import { StatsCards } from '@/components/Dashboard/StatsCards';
-import { BudgetSummary } from '@/components/Dashboard/BudgetSummary';
+
 import { UserAvatar } from '@/components/Common/UserAvatar';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -14,12 +14,16 @@ import {
 } from 'lucide-react';
 import { priorityConfig, statusConfig, formatDate, isOverdue, getDaysRemaining } from '@/utils/constants';
 
-/**
- * Main executive Dashboard page displaying business KPIs, recent projects, priority tasks, and portfolio status.
- */
+import { useAuthStore } from '@/store/authStore';
+import { Users } from 'lucide-react';
+
 export function Dashboard() {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
   const { projects } = useProjectStore();
+
+  const isAdmin = user?.role === 'ADMINISTRATEUR';
+  const isChef = user?.role === 'CHEF_DE_PROJET';
 
   const recentProjects = [...projects]
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
@@ -27,9 +31,15 @@ export function Dashboard() {
 
   const overdueProjects = projects.filter((p) => isOverdue(p.endDate, p.status));
 
-  const urgentTasks = projects
+  const allUrgentTasks = projects
     .flatMap((p) => p.tasks.map((t) => ({ ...t, projectName: p.title, projectId: p.id })))
-    .filter((t) => t.status !== 'done')
+    .filter((t) => t.status !== 'done');
+
+  // Pour les membres, filtrer les tâches qui leur sont assignées
+  const urgentTasks = (user?.role === 'MEMBRE' 
+    ? allUrgentTasks.filter((t) => t.assignedTo?.id === user.id || t.assignedToId === user.id)
+    : allUrgentTasks
+  )
     .sort((a, b) => {
       const priorityOrder: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
       return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
@@ -39,28 +49,50 @@ export function Dashboard() {
   const totalProjectsCount = projects.length || 1;
   const activeCount = projects.filter((p) => p.status === 'active').length;
   const completedCount = projects.filter((p) => p.status === 'completed').length;
-  const planningCount = projects.filter((p) => p.status === 'planning').length;
-  const onHoldCount = projects.filter((p) => p.status === 'on-hold').length;
+  const archivedCount = projects.filter((p) => p.status === 'archived').length;
+
+  const getDashboardTitle = () => {
+    if (isAdmin) return 'Tableau de Bord — Supervision';
+    if (isChef) return 'Tableau de Bord — Pilotage';
+    return 'Tableau de Bord — Mes Projets & Tâches';
+  };
+
+  const getDashboardSubtitle = () => {
+    if (isAdmin) return "Supervision globale des projets, finances et utilisateurs de l'organisation";
+    if (isChef) return "Pilotage en temps réel de vos projets, budgets et suivi des équipes";
+    return "Consultez vos tâches assignées, vos projets et vos prochaines échéances";
+  };
 
   return (
     <div className="space-y-6 sm:space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Tableau de Bord
+            {getDashboardTitle()}
           </h1>
           <p className="text-slate-500 text-xs sm:text-sm mt-1">
-            Vue d'ensemble en temps réel de vos projets et de votre équipe
+            {getDashboardSubtitle()}
           </p>
         </div>
-        <button
-          onClick={() => navigate('/projects')}
-          className="btn btn-primary flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold rounded-md"
-        >
-          <FolderKanban size={16} />
-          <span>Voir tous les projets</span>
-          <ArrowRight size={14} />
-        </button>
+        <div className="flex items-center gap-2.5">
+          {isAdmin && (
+            <button
+              onClick={() => navigate('/admin/users')}
+              className="btn btn-secondary flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold rounded-md cursor-pointer"
+            >
+              <Users size={16} />
+              <span>Gérer les utilisateurs</span>
+            </button>
+          )}
+          <button
+            onClick={() => navigate('/projects')}
+            className="btn btn-primary flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold rounded-md cursor-pointer"
+          >
+            <FolderKanban size={16} />
+            <span>{isAdmin ? 'Superviser les projets' : isChef ? 'Mes projets' : 'Voir mes projets'}</span>
+            <ArrowRight size={14} />
+          </button>
+        </div>
       </div>
 
       <StatsCards />
@@ -71,7 +103,7 @@ export function Dashboard() {
           <div className="bg-white border border-slate-200 rounded-md overflow-hidden">
             <div className="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-md">
+                <div className="p-2 bg-[#2563EB] text-white rounded-md shrink-0">
                   <Layers size={18} />
                 </div>
                 <div>
@@ -181,7 +213,7 @@ export function Dashboard() {
           <div className="bg-white border border-slate-200 rounded-md p-4 sm:p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-amber-50 text-amber-600 border border-amber-200 rounded-md">
+                <div className="p-2 bg-[#D97706] text-white rounded-md shrink-0">
                   <Clock size={18} />
                 </div>
                 <div>
@@ -240,11 +272,16 @@ export function Dashboard() {
           {/* Attention : Projets en retard */}
           {overdueProjects.length > 0 && (
             <div className="bg-white border border-slate-200 rounded-md p-4 sm:p-5">
-              <div className="flex items-center gap-2 text-rose-600 font-bold mb-3">
-                <AlertCircle size={18} className="shrink-0" />
-                <h3 className="text-xs uppercase tracking-wider font-extrabold">
-                  Attention : Projets en Retard ({overdueProjects.length})
-                </h3>
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="p-2 bg-[#DC2626] text-white rounded-md shrink-0">
+                  <AlertCircle size={18} />
+                </div>
+                <div>
+                  <h3 className="text-xs uppercase tracking-wider font-extrabold text-slate-900">
+                    Projets en Retard ({overdueProjects.length})
+                  </h3>
+                  <p className="text-[11px] text-rose-600 font-semibold">Nécessite une action immédiate</p>
+                </div>
               </div>
               <div className="space-y-2">
                 {overdueProjects.map((proj) => {
@@ -269,13 +306,10 @@ export function Dashboard() {
             </div>
           )}
 
-          {/* Widget Finances */}
-          <BudgetSummary />
-
           {/* Répartition des statuts */}
           <div className="bg-white border border-slate-200 rounded-md p-4 sm:p-5">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="p-2 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-md">
+              <div className="p-2 bg-[#6366F1] text-white rounded-md shrink-0">
                 <TrendingUp size={18} />
               </div>
               <div>
@@ -288,52 +322,39 @@ export function Dashboard() {
               <div>
                 <div className="flex justify-between text-slate-700 mb-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    Actifs
+                    <span className="w-2 h-2 rounded-full bg-[#2563EB]" />
+                    En cours
                   </span>
                   <span className="font-bold">{activeCount} ({Math.round((activeCount / totalProjectsCount) * 100)}%)</span>
                 </div>
                 <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-sm" style={{ width: `${(activeCount / totalProjectsCount) * 100}%` }} />
+                  <div className="h-full bg-[#2563EB] rounded-sm" style={{ width: `${(activeCount / totalProjectsCount) * 100}%` }} />
                 </div>
               </div>
 
               <div>
                 <div className="flex justify-between text-slate-700 mb-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                    <span className="w-2 h-2 rounded-full bg-[#16A34A]" />
                     Terminés
                   </span>
                   <span className="font-bold">{completedCount} ({Math.round((completedCount / totalProjectsCount) * 100)}%)</span>
                 </div>
                 <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
-                  <div className="h-full bg-indigo-500 rounded-sm" style={{ width: `${(completedCount / totalProjectsCount) * 100}%` }} />
+                  <div className="h-full bg-[#16A34A] rounded-sm" style={{ width: `${(completedCount / totalProjectsCount) * 100}%` }} />
                 </div>
               </div>
 
               <div>
                 <div className="flex justify-between text-slate-700 mb-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-blue-500" />
-                    Planification
+                    <span className="w-2 h-2 rounded-full bg-[#64748B]" />
+                    Archivés
                   </span>
-                  <span className="font-bold">{planningCount} ({Math.round((planningCount / totalProjectsCount) * 100)}%)</span>
+                  <span className="font-bold">{archivedCount} ({Math.round((archivedCount / totalProjectsCount) * 100)}%)</span>
                 </div>
                 <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
-                  <div className="h-full bg-blue-500 rounded-sm" style={{ width: `${(planningCount / totalProjectsCount) * 100}%` }} />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-slate-700 mb-1">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-amber-500" />
-                    En Pause
-                  </span>
-                  <span className="font-bold">{onHoldCount} ({Math.round((onHoldCount / totalProjectsCount) * 100)}%)</span>
-                </div>
-                <div className="w-full h-1.5 bg-slate-100 rounded-sm overflow-hidden">
-                  <div className="h-full bg-amber-500 rounded-sm" style={{ width: `${(onHoldCount / totalProjectsCount) * 100}%` }} />
+                  <div className="h-full bg-[#64748B] rounded-sm" style={{ width: `${(archivedCount / totalProjectsCount) * 100}%` }} />
                 </div>
               </div>
             </div>

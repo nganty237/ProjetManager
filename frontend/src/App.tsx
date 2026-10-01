@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Sidebar from '@/components/Layout/Sidebar';
 import Header from '@/components/Layout/Header';
+import { LandingPage } from '@/pages/LandingPage';
 import { Dashboard } from '@/pages/Dashboard';
 import { Projects } from '@/pages/Projects';
 import { ProjectDetail } from '@/pages/ProjectDetail';
@@ -10,15 +11,15 @@ import { Settings } from '@/pages/Settings';
 import { Profile } from '@/pages/Profile';
 import { Finance } from '@/pages/Finance';
 import { Login } from '@/pages/Login';
-import { Signup } from '@/pages/Signup';
-import { ProjectForm } from '@/components/Projects/ProjectForm';
+import { ActivateAccount } from '@/pages/ActivateAccount';
+import { AdminUsers } from '@/pages/AdminUsers';
+import { MyTasks } from '@/pages/MyTasks';
 import { ProtectedRoute } from '@/components/Auth/ProtectedRoute';
 import { useAuthStore } from '@/store/authStore';
 import { useProjectStore } from '@/store/projectStore';
 
 // Layout wrapper for authenticated routes
 function AuthenticatedLayout() {
-  const [showProjectForm, setShowProjectForm] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const fetchProjects = useProjectStore((state) => state.fetchProjects);
   const fetchTeamMembers = useProjectStore((state) => state.fetchTeamMembers);
@@ -42,10 +43,6 @@ function AuthenticatedLayout() {
       <Sidebar 
         isOpen={isSidebarOpen} 
         onClose={() => setIsSidebarOpen(false)}
-        onCreateProject={() => {
-          setShowProjectForm(true);
-          setIsSidebarOpen(false);
-        }} 
       />
       
       {/* Main content */}
@@ -58,14 +55,9 @@ function AuthenticatedLayout() {
           </div>
         </main>
       </div>
-      
-      {/* Modal de création de projet */}
-      {showProjectForm && (
-        <ProjectForm onClose={() => setShowProjectForm(false)} />
-      )}
     </div>
   );
-};
+}
 
 function App() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -73,25 +65,48 @@ function App() {
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
-        {/* Public routes */}
-        <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} />
-        <Route path="/signup" element={!isAuthenticated ? <Signup /> : <Navigate to="/" replace />} />
+        {/* Page d'accueil : Landing page publique si non connecté, Dashboard si connecté */}
+        <Route 
+          path="/" 
+          element={
+            isAuthenticated ? (
+              <AuthenticatedLayout />
+            ) : (
+              <LandingPage />
+            )
+          }
+        >
+          {isAuthenticated && <Route index element={<Dashboard />} />}
+        </Route>
 
-        {/* Protected routes */}
+        {/* Routes publiques */}
+        <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} />
+        <Route path="/activate/:token" element={<ActivateAccount />} />
+
+        {/* Routes protégées de l'application */}
         <Route element={<ProtectedRoute />}>
           <Route element={<AuthenticatedLayout />}>
-            <Route path="/" element={<Dashboard />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/projects/:id" element={<ProjectDetail />} />
+            <Route path="/my-tasks" element={<MyTasks />} />
             <Route path="/team" element={<Team />} />
-            <Route path="/finance" element={<Finance />} />
-            <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
+
+            {/* Routes réservées aux Administrateurs */}
+            <Route element={<ProtectedRoute allowedRoles={['ADMINISTRATEUR']} />}>
+              <Route path="/admin/users" element={<AdminUsers />} />
+            </Route>
+
+            {/* Finance : Administrateur et Chef de projet */}
+            <Route element={<ProtectedRoute allowedRoles={['ADMINISTRATEUR', 'CHEF_DE_PROJET']} />}>
+              <Route path="/finance" element={<Finance />} />
+            </Route>
           </Route>
         </Route>
 
-        {/* Catch-all redirect */}
-        <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
+        {/* Redirection pour toute autre route inconnue */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

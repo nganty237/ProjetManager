@@ -54,6 +54,8 @@ export function StatusDropdown({
     label: item.label,
     color: item.color,
     bgColor: item.bgColor,
+    dotBg: item.dotBg || item.bgColor,
+    hex: item.hex,
     icon: item.icon,
   }));
 
@@ -89,7 +91,10 @@ export function StatusDropdown({
                 }`}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className={`w-2 h-2 rounded-full shrink-0 ${opt.bgColor} border border-black/10`} />
+                  <span
+                    className={`w-2 h-2 rounded-full shrink-0 ${opt.dotBg || 'bg-slate-400'} border border-black/10`}
+                    style={opt.hex ? { backgroundColor: opt.hex } : undefined}
+                  />
                   <span className="truncate">{opt.label}</span>
                 </div>
                 {isSelected && <Check size={14} className="text-blue-600 shrink-0 ml-1" />}

@@ -1,139 +1,38 @@
-﻿import Project from '../models/Project.js';
-import User from '../models/User.js';
-import Task from '../models/Task.js';
-import Expense from '../models/Expense.js';
 import asyncHandler from '../utils/asyncHandler.js';
+import * as projectService from '../services/projectService.js';
 
-// Récupérer tous les projets avec leurs membres, tâches (avec assigné) et dépenses
+// Récupérer les projets selon le rôle de l'utilisateur
 export const getProjects = asyncHandler(async (req, res) => {
-  const projects = await Project.findAll({
-    include: [
-      { model: User, as: 'members', attributes: ['id', 'name', 'avatar', 'role'] },
-      {
-        model: Task,
-        include: [{ model: User, as: 'assignee', attributes: ['id', 'name', 'avatar', 'role'] }],
-      },
-      { model: Expense, as: 'expenses' },
-    ],
-    order: [['updatedAt', 'DESC']],
-  });
+  const projects = await projectService.findProjectsByUser(req.user);
   res.json(projects);
 });
 
 // Récupérer un projet spécifique par son ID
 export const getProjectById = asyncHandler(async (req, res) => {
-  const project = await Project.findByPk(req.params.id, {
-    include: [
-      { model: User, as: 'members', attributes: ['id', 'name', 'avatar', 'role'] },
-      {
-        model: Task,
-        include: [{ model: User, as: 'assignee', attributes: ['id', 'name', 'avatar', 'role'] }],
-      },
-      { model: Expense, as: 'expenses' },
-    ],
-  });
-  if (project) {
-    res.json(project);
-  } else {
-    res.status(404);
-    throw new Error("Projet non trouvé");
-  }
+  const project = await projectService.findProjectById(req.params.id, req.user);
+  res.json(project);
 });
 
-// Créer un nouveau projet
+// Créer un nouveau projet (Chef de projet uniquement)
 export const createProject = asyncHandler(async (req, res) => {
-  const { title, description, status, priority, startDate, endDate, teamIds, budgetAllocated } = req.body;
-
-  const project = await Project.create({
-    title,
-    description,
-    status,
-    priority,
-    startDate,
-    endDate,
-    budgetAllocated: budgetAllocated ? Number(budgetAllocated) : 0,
-  });
-
-  // Ajouter les membres à l'équipe (table de jointure TeamMembers)
-  if (teamIds && teamIds.length > 0) {
-    await project.addMembers(teamIds);
-  }
-
-  // Récupérer le projet créé avec ses membres, tâches et dépenses
-  const createdProject = await Project.findByPk(project.id, {
-    include: [
-      { model: User, as: 'members', attributes: ['id', 'name', 'avatar', 'role'] },
-      {
-        model: Task,
-        include: [{ model: User, as: 'assignee', attributes: ['id', 'name', 'avatar', 'role'] }],
-      },
-      { model: Expense, as: 'expenses' },
-    ],
-  });
-
-  res.status(201).json(createdProject);
+  const project = await projectService.createNewProject(req.body, req.user);
+  res.status(201).json(project);
 });
 
-// Mettre à jour un projet
+// Mettre à jour un projet (Propriétaire uniquement)
 export const updateProject = asyncHandler(async (req, res) => {
-  const project = await Project.findByPk(req.params.id);
-  if (!project) {
-    res.status(404);
-    throw new Error("Projet non trouvé");
-  }
-
-  const { teamIds, budgetAllocated, ...projectData } = req.body;
-  
-  if (budgetAllocated !== undefined) {
-    projectData.budgetAllocated = Number(budgetAllocated) || 0;
-  }
-
-  await project.update(projectData);
-
-  // Mettre à jour l'équipe si nécessaire
-  if (teamIds) {
-    await project.setMembers(teamIds);
-  }
-
-  // Récupérer le projet à jour
-  const updatedProject = await Project.findByPk(project.id, {
-    include: [
-      { model: User, as: 'members', attributes: ['id', 'name', 'avatar', 'role'] },
-      {
-        model: Task,
-        include: [{ model: User, as: 'assignee', attributes: ['id', 'name', 'avatar', 'role'] }],
-      },
-      { model: Expense, as: 'expenses' },
-    ],
-  });
-
+  const updatedProject = await projectService.updateExistingProject(req.params.id, req.body, req.user);
   res.json(updatedProject);
 });
 
-// Mettre à jour spécifiquement le budget alloué d'un projet
+// Mettre à jour spécifiquement le budget alloué d'un projet (Propriétaire uniquement)
 export const updateProjectBudget = asyncHandler(async (req, res) => {
-  const project = await Project.findByPk(req.params.id);
-  if (!project) {
-    res.status(404);
-    throw new Error("Projet non trouvé");
-  }
-
-  const { allocated } = req.body;
-  const budgetAllocated = Number(allocated) || 0;
-
-  await project.update({ budgetAllocated });
-
-  res.json({ id: project.id, budgetAllocated, budget: { allocated: budgetAllocated } });
+  const result = await projectService.updateProjectBudgetAmount(req.params.id, req.body.allocated, req.user);
+  res.json(result);
 });
 
-// Supprimer un projet
+// Supprimer un projet (Propriétaire uniquement)
 export const deleteProject = asyncHandler(async (req, res) => {
-  const project = await Project.findByPk(req.params.id);
-  if (!project) {
-    res.status(404);
-    throw new Error("Projet non trouvé");
-  }
-
-  await project.destroy();
-  res.json({ message: "Projet supprimé" });
+  const result = await projectService.deleteProjectById(req.params.id, req.user);
+  res.json(result);
 });

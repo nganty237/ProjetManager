@@ -4,12 +4,12 @@ import {
   FolderKanban,
   Users,
   Settings,
-  PlusCircle,
   X,
   User,
   LogOut,
   Shield,
   Wallet,
+  CheckSquare,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { UserAvatar } from '@/components/Common/UserAvatar';
@@ -17,22 +17,44 @@ import { UserAvatar } from '@/components/Common/UserAvatar';
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreateProject: () => void;
 }
 
-export function Sidebar({ isOpen, onClose, onCreateProject }: SidebarProps) {
+export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
-  const isAdmin = user?.role === 'Administrateur';
+  const role = user?.role;
+  const isAdmin = role === 'ADMINISTRATEUR';
+  const isChef = role === 'CHEF_DE_PROJET';
 
-  const navItems = [
-    { path: '/', icon: LayoutDashboard, label: 'Tableau de bord' },
-    { path: '/projects', icon: FolderKanban, label: 'Projets' },
-    { path: '/team', icon: Users, label: 'Équipe' },
-    ...(isAdmin ? [{ path: '/finance', icon: Wallet, label: 'Finances' }] : []),
-    { path: '/settings', icon: Settings, label: 'Paramètres' },
-  ];
+  let navItems = [];
+
+  if (isAdmin) {
+    navItems = [
+      { path: '/', icon: LayoutDashboard, label: 'Tableau de bord' },
+      { path: '/admin/users', icon: Shield, label: 'Utilisateurs' },
+      { path: '/projects', icon: FolderKanban, label: 'Projets (Supervision)' },
+      { path: '/team', icon: Users, label: 'Équipe' },
+      { path: '/settings', icon: Settings, label: 'Paramètres' },
+    ];
+  } else if (isChef) {
+    navItems = [
+      { path: '/', icon: LayoutDashboard, label: 'Tableau de bord' },
+      { path: '/projects', icon: FolderKanban, label: 'Mes Projets' },
+      { path: '/finance', icon: Wallet, label: 'Finances' },
+      { path: '/team', icon: Users, label: 'Équipe' },
+      { path: '/settings', icon: Settings, label: 'Paramètres' },
+    ];
+  } else {
+    // Membre
+    navItems = [
+      { path: '/', icon: LayoutDashboard, label: 'Tableau de bord' },
+      { path: '/projects', icon: FolderKanban, label: 'Mes Projets' },
+      { path: '/my-tasks', icon: CheckSquare, label: 'Mes Tâches' },
+      { path: '/team', icon: Users, label: 'Équipe' },
+      { path: '/settings', icon: Settings, label: 'Paramètres' },
+    ];
+  }
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
@@ -43,6 +65,14 @@ export function Sidebar({ isOpen, onClose, onCreateProject }: SidebarProps) {
     logout();
     navigate('/login');
   };
+
+  const getRoleDisplay = () => {
+    if (role === 'ADMINISTRATEUR') return { label: 'Administrateur', color: 'text-amber-700 font-semibold', iconColor: 'text-amber-600' };
+    if (role === 'CHEF_DE_PROJET') return { label: 'Chef de projet', color: 'text-blue-700 font-semibold', iconColor: 'text-blue-600' };
+    return { label: 'Membre', color: 'text-slate-600', iconColor: 'text-slate-500' };
+  };
+
+  const roleDisplay = getRoleDisplay();
 
   return (
     <aside
@@ -67,18 +97,6 @@ export function Sidebar({ isOpen, onClose, onCreateProject }: SidebarProps) {
           <X size={18} />
         </button>
       </div>
-
-      {isAdmin && (
-        <div className="p-3.5">
-          <button
-            onClick={onCreateProject}
-            className="btn btn-primary w-full py-2 px-3.5 flex items-center justify-center gap-2 text-xs sm:text-sm"
-          >
-            <PlusCircle size={16} />
-            Nouveau Projet
-          </button>
-        </div>
-      )}
 
       <nav className="flex-1 p-3.5 overflow-y-auto">
         <ul className="space-y-1">
@@ -119,9 +137,9 @@ export function Sidebar({ isOpen, onClose, onCreateProject }: SidebarProps) {
           <div className="flex-1 min-w-0">
             <p className="text-xs font-bold text-slate-900 truncate">{user?.name ?? '—'}</p>
             <div className="flex items-center gap-1">
-              <Shield size={11} className={user?.role === 'Administrateur' ? 'text-amber-600' : 'text-blue-600'} />
-              <p className={`text-[11px] truncate ${user?.role === 'Administrateur' ? 'text-amber-700 font-semibold' : 'text-blue-600'}`}>
-                {user?.role ?? 'Membre'}
+              <Shield size={11} className={roleDisplay.iconColor} />
+              <p className={`text-[11px] truncate ${roleDisplay.color}`}>
+                {roleDisplay.label}
               </p>
             </div>
           </div>

@@ -27,7 +27,7 @@ export function BudgetSummary() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-slate-100 text-slate-600 border border-slate-200 rounded-md">
+          <div className="p-2 bg-[#16A34A] text-white rounded-md shrink-0">
             <Wallet size={18} />
           </div>
           <div>
