@@ -11,6 +11,8 @@ import { Settings } from '@/pages/Settings';
 import { Profile } from '@/pages/Profile';
 import { Finance } from '@/pages/Finance';
 import { Login } from '@/pages/Login';
+import { ForgotPassword } from '@/pages/ForgotPassword';
+import { ResetPassword } from '@/pages/ResetPassword';
 import { ActivateAccount } from '@/pages/ActivateAccount';
 import { AdminUsers } from '@/pages/AdminUsers';
 import { MyTasks } from '@/pages/MyTasks';
@@ -81,6 +83,8 @@ function App() {
 
         {/* Routes publiques */}
         <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/activate/:token" element={<ActivateAccount />} />
 
         {/* Routes protégées de l'application */}
