@@ -93,8 +93,16 @@ export function Login() {
 
           {/* Mot de passe */}
           <div>
-            <label className="label">Mot de passe</label>
-            <div className="relative">
+            <div className="flex items-center justify-between">
+              <label className="label mb-0">Mot de passe</label>
+              <Link
+                to="/forgot-password"
+                className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+              >
+                Mot de passe oublié ?
+              </Link>
+            </div>
+            <div className="relative mt-1">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                 <Lock size={18} />
               </div>
